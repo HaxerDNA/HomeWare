@@ -2,7 +2,7 @@
 // @name          Krunker Homeware-69 obv not pasted
 // @description   A full featured Mod menu for game Krunker.io!
 // @version       2.28
-// @updateURL    https://github.com/HaxerDNA/HomeWare/raw/main/HomeWare-69.user.js
+// @updateURL     https://github.com/HaxerDNA/HomeWare/raw/main/HomeWare-69.user.js
 // @author        CaptnDNA - From Homeware-69
 // @supportURL    https://discord.gg/bngY3TryZX
 // @homepage      Comming Soon...
