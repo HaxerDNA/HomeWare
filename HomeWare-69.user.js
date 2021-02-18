@@ -1,9 +1,8 @@
 // ==UserScript==
 // @name          Krunker Homeware-69 obv not pasted
-// @description   Hack by CaptnDNA and Minecodes (Why class Dogeware? cuz its a little pasted from Dogeware)
-// @version       2
-// @updateURL     https://github.com/HaxerDNA/HomeWare/raw/main/HomeWare-69.user.js
-// @author        CaptnDNA - From Homeware-69
+// @description   A full featured Mod menu for game Krunker.io!
+// @version       2.28
+// @author        CaptnDNA and Minecodes
 // @supportURL    https://discord.gg/bngY3TryZX
 // @homepage      Comming Soon...
 // @iconURL       https://cdn.discordapp.com/attachments/802562993703092265/810509012399030312/HomewarePFP.jpg
@@ -17,140 +16,592 @@
 // ==/UserScript==
 
 /* eslint-env es6 */
-/* eslint-disable curly, no-undef, no-loop-func, no-return-assign, no-sequences */
+/* eslint-disable no-caller, no-undef, no-loop-func */
 
-(function(dogStr, dog) {
+(function(skidStr, CRC2d, skid) {
 
-    class Dogeware {
+    class Skid {
         constructor() {
-            dog = this;
-            this.token = null;
-            this.gameJS = null;
+            skid = this;
             this.generated = false;
-            console.dir(this);
-            this.settings = Object.assign({}, {
-                aimbot: 1,
-                superSilent: true,
-                AImbot: true,
-                frustumCheck: false,
-                weaponZoom: 1,
-                wallbangs: true,
-                alwaysAim: false,
-                pitchHack: 0,
-                thirdPerson: false,
-                autoReload: false,
-                speedHack: false,
-                rangeCheck: false,
-                alwaysTrail: false,
-                spinAimFrames: 10,
-                animatedBillboards: false,
-                esp: 1,
-                espFontSize: 10,
-                tracers: false,
-                showGuiButton: true,
-                awtv: false,
-                uwtv: false,
-                forceUnsilent: false,
-                bhop: 0,
-                spinBot: false,
-                markTarget: true,
-                skinHack: false,
-                aimOffset: 0,
-                aimNoise: 0,
-                keybinds: true,
-                antikick: true,
-                fovbox: false,
-                drawFovbox: true,
-                fovBoxSize: 1,
-                guiOnMMB: false,
-                hideAdverts: false,
-                hideStreams: false,
-                hideMerch: false,
-                hideNewsConsole: false,
-                hideCookieButton: false,
-                chams: false,
-                chamsCol: 1,
-                wireframe: false,
-                kpalCSS: true,
-                customCSS: "",
-                teamChams: false,
-                autoNuke: false,
-                chamsInterval: 500,
-                preventMeleeThrowing: false,
-                //autoSwap: false,
-                forceNametagsOn: false,
-                aimbotRange: 0,
-            });
-            this.state = Object.assign({}, {
-                bindAimbotOn: true,
-                quickscopeCanShoot: true,
-                spinFrame: 0,
-                pressedKeys: new Set(),
-                spinCounter: 0,
-                activeTab: 0,
-                nameTags: false,
-                frame: 0
-            });
-            this.gaybow = 0;
-            this.colors = {
-                White: "#FFFFFF",
-                Black: "#000000",
-                Purple: "#9400D3",
-                Pink: "#FF1493",
-                Blue: "#1E90FF",
-                DarkBlue: "#0000FF",
-                Aqua: "#00FFFF",
-                Green: "#008000",
-                Lime: "#7FFF00",
-                Orange: "#FF8C00",
-                Yellow: "#FFFF00",
-                Red: "#FF0000",
-            }
+            this.gameJS = null;
+            this.token = null;
+            this.downKeys = new Set();
+            this.settings = null;
             this.vars = {};
-            this.GUI = {};
+            this.playerMaps = [];
+            this.skinCache = {};
+            this.inputFrame = 0;
+            this.renderFrame = 0;
+            this.fps = 0;
+            this.lists = {
+                renderESP: {
+                    off: "Off",
+                    walls: "Walls",
+                    twoD: "2d",
+                    full: "Full"
+                },
+                renderChams: {
+                    off: "Off",
+                    "#FFFFFF": "White",
+                    "#000000": "Black",
+                    "#9400D3": "Purple",
+                    "#FF1493": "Pink",
+                    "#1E90FF": "Blue",
+                    "#0000FF": "DarkBlue",
+                    "#00FFFF": "Aqua",
+                    "#008000": "Green",
+                    "#7FFF00": "Lime",
+                    "#FF8C00": "Orange",
+                    "#FFFF00": "Yellow",
+                    "#FF0000": "Red",
+                    Rainbow: "Rainbow",
+                },
+                autoBhop: {
+                    off: "Off",
+                    autoJump: "Auto Jump",
+                    keyJump: "Key Jump",
+                    autoSlide: "Auto Slide",
+                    keySlide: "Key Slide"
+                },
+                autoAim: {
+                    off: "Off",
+                    correction: "Aim Correction",
+                    assist: "Legit Aim Assist",
+                    easyassist: "Easy Aim Assist",
+                    silent: "Silent Aim",
+                    trigger: "Trigger Bot",
+                    quickScope: "Quick Scope"
+                },
+                audioStreams: {
+                    off: 'Off',
+                    _2000s: 'General German/English',
+                    _HipHopRNB: 'Hip Hop / RNB',
+                    _Oldskool: 'Hip Hop Oldskool',
+                    _Country: 'Country',
+                    _Pop: 'Pop',
+                    _Dance: 'Dance',
+                    _Dubstep: 'DubStep',
+                    _Lowfi: 'LoFi HipHop',
+                    _Jazz: 'Jazz',
+                    _Oldies: 'Golden Oldies',
+                    _Club: 'Club',
+                    _Folk: 'Folk',
+                    _ClassicRock: 'Classic Rock',
+                    _Metal: 'Heavy Metal',
+                    _DeathMetal: 'Death Metal',
+                    _Classical: 'Classical',
+                    _Alternative: 'Alternative',
+                },
+            }
+            this.consts = {
+                twoPI: Math.PI * 2,
+                halfPI: Math.PI / 2,
+                playerHeight: 11,
+                cameraHeight: 1.5,
+                headScale: 2,
+                armScale: 1.3,
+                armInset: 0.1,
+                chestWidth: 2.6,
+                hitBoxPad: 1,
+                crouchDst: 3,
+                recoilMlt: 0.3,
+                nameOffset: 0.6,
+                nameOffsetHat: 0.8,
+            };
+            this.key = {
+                frame: 0,
+                delta: 1,
+                xdir: 2,
+                ydir: 3,
+                moveDir: 4,
+                shoot: 5,
+                scope: 6,
+                jump: 7,
+                reload: 8,
+                crouch: 9,
+                weaponScroll: 10,
+                weaponSwap: 11,
+                moveLock: 12
+            };
+            this.css = {
+                noTextShadows: `*, .button.small, .bigShadowT { text-shadow: none !important; }`,
+                hideAdverts: `#aMerger, #endAMerger { display: none !important }`,
+                hideSocials: `.headerBarRight > .verticalSeparator, .imageButton { display: none }`,
+                cookieButton: `#onetrust-consent-sdk { display: none !important }`,
+                newsHolder: `#newsHolder { display: none !important }`,
+            };
+            this.isProxy = Symbol("isProxy");
+            this.spinTimer = 1800;
             try {
                 this.onLoad();
-            } catch (e) {
+            }
+            catch(e) {
                 console.error(e);
                 console.trace(e.stack);
             }
         }
+        canStore() {
+            return this.isDefined(Storage);
+        }
 
-        onLoad() {
+        saveVal(name, val) {
+            if (this.canStore()) localStorage.setItem("kro_utilities_"+name, val);
+        }
 
-            this.waitFor(_=>document.documentElement instanceof window.HTMLElement).then(_=>{
-                this.iframe();
-            })
-            this.createObservers();
-            this.defines();
-            localStorage.kro_setngss_json ? Object.assign(this.settings, JSON.parse(localStorage.kro_setngss_json)) :
-            localStorage.kro_setngss_json = JSON.stringify(this.settings);
-            this.createListeners();
-            this.waitFor(_=>this.token).then(_ => {
-                if (!this.token) location.reload();
-                const loader = new Function("WP_fetchMMToken", "Module", this.gamePatch());
-                loader(new Promise(res=>res(this.token)), { csv: async () => 0 });
-                return this.hooking();
-            })
+        deleteVal(name) {
+            if (this.canStore()) localStorage.removeItem("kro_utilities_"+name);
+        }
+
+        getSavedVal(name) {
+            if (this.canStore()) return localStorage.getItem("kro_utilities_"+name);
+            return null;
         }
 
         isType(item, type) {
             return typeof item === type;
         }
 
-        isDefined(item) {
-            return !this.isType(item, "undefined") && item !== null;
+        isDefined(object) {
+            return !this.isType(object, "undefined") && object !== null;
+        }
+
+        isNative(fn) {
+            return (/^function\s*[a-z0-9_\$]*\s*\([^)]*\)\s*\{\s*\[native code\]\s*\}/i).test('' + fn)
+        }
+
+        getStatic(s, d) {
+            return this.isDefined(s) ? s : d
+        }
+
+        crossDomain(url) {
+            return "https://crossorigin.me/" + url;
+        }
+
+        async waitFor(test, timeout_ms = 2e4, doWhile = null) {
+            let sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            return new Promise(async (resolve, reject) => {
+                if (typeof timeout_ms != "number") reject("Timeout argument not a number in waitFor(selector, timeout_ms)");
+                let result, freq = 100;
+                while (result === undefined || result === false || result === null || result.length === 0) {
+                    if (doWhile && doWhile instanceof Function) doWhile();
+                    if (timeout_ms % 1e4 < freq) console.log("waiting for: ", test);
+                    if ((timeout_ms -= freq) < 0) {
+                        console.log( "Timeout : ", test );
+                        resolve(false);
+                        return;
+                    }
+                    await sleep(freq);
+                    result = typeof test === "string" ? Function(test)() : test();
+                }
+                console.log("Passed : ", test);
+                resolve(result);
+            });
+        };
+
+        async request(url, type, opt = {}) {
+            return fetch(url, opt).then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response from " + url + " was not ok")
+                }
+                return response[type]()
+            })
+        }
+
+        async fetchScript() {
+            const data = await this.request("https://krunker.io/social.html", "text");
+            const buffer = await this.request("https://krunker.io/pkg/krunker." + /\w.exports="(\w+)"/.exec(data)[1] + ".vries", "arrayBuffer");
+            const array = Array.from(new Uint8Array(buffer));
+            const xor = array[0] ^ '!'.charCodeAt(0);
+            return array.map((code) => String.fromCharCode(code ^ xor)).join('');
+        }
+
+        createSettings() {
+            this.displayStyle = (el, val) => {
+                this.waitFor(_=>window[el], 5e3).then(node => {
+                    if (node) node.style.display = val ? "none" : "inherit";
+                    else console.error(el, " was not found in the window object");
+                })
+            }
+            this.settings = {
+                //Rendering
+                showSkidBtn: {
+                    pre: "<div class='setHed'>Rendering</div>",
+                    name: "Show/Hide Homeware-69 Button",
+                    val: true,
+                    html: () => this.generateSetting("checkbox", "showSkidBtn", this),
+                    set: (value, init) => {
+                        let button = document.getElementById("mainButton");
+                        if (!this.isDefined(button)) this.createButton("Homeware-69", "https://cdn.discordapp.com/attachments/802562993703092265/810511829079031848/circle-cropped.png", this.toggleMenu, value)
+                        else button.style.display = value ? "inherit" : "none";
+                    }
+                },
+                hideAdverts: {
+                    name: "Hide Advertisments",
+                    val: true,
+                    html: () => this.generateSetting("checkbox", "hideAdverts", this),
+                    set: (value, init) => {
+                        if (value) this.head.appendChild(this.css.hideAdverts)
+                        else if (!init) this.css.hideAdverts.remove()
+                    }
+                },
+                hideStreams: {
+                    name: "Hide Streams",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "hideStreams", this),
+                    set: (value) => { this.displayStyle("streamContainer", value) }
+                },
+                hideMerch: {
+                    name: "Hide Merch",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "hideMerch", this),
+                    set: (value) => { this.displayStyle("merchHolder", value) }
+                },
+                hideNewsConsole: {
+                    name: "Hide News Console",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "hideNewsConsole", this),
+                    set: (value) => { this.displayStyle("newsHolder", value) }
+                },
+                hideCookieButton: {
+                    name: "Hide Security Manage Button",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "hideCookieButton", this),
+                    set: (value) => { this.displayStyle("onetrust-consent-sdk", value) }
+                },
+                noTextShadows: {
+                    name: "Remove Text Shadows",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "noTextShadows", this),
+                    set: (value, init) => {
+                        if (value) this.head.appendChild(this.css.noTextShadows)
+                        else if (!init) this.css.noTextShadows.remove()
+                    }
+                },
+                customCSS: {
+                    name: "Custom CSS",
+                    val: "",
+                    html: () => this.generateSetting("url", "customCSS", "URL to CSS file"),
+                    resources: { css: document.createElement("link") },
+                    set: (value, init) => {
+                        if (value.startsWith("http")&&value.endsWith(".css")) {
+                            //let proxy = 'https://cors-anywhere.herokuapp.com/';
+                            this.settings.customCSS.resources.css.href = value
+                        }
+                        if (init) {
+                            this.settings.customCSS.resources.css.rel = "stylesheet"
+                            try {
+                                this.head.appendChild(this.settings.customCSS.resources.css)
+                            } catch(e) {
+                                alert(e)
+                                this.settings.customCSS.resources.css = null
+                            }
+                        }
+                    }
+                },
+                renderESP: {
+                    name: "Player ESP Type",
+                    val: "off",
+                    html: () =>
+                    this.generateSetting("select", "renderESP", this.lists.renderESP),
+                },
+                renderTracers: {
+                    name: "Player Tracers",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "renderTracers"),
+                },
+                rainbowColor: {
+                    name: "Rainbow ESP",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "rainbowColor"),
+                },
+                renderChams: {
+                    name: "Player Chams",
+                    val: "off",
+                    html: () =>
+                    this.generateSetting(
+                        "select",
+                        "renderChams",
+                        this.lists.renderChams
+                    ),
+                },
+                renderWireFrame: {
+                    name: "Player Wireframe",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "renderWireFrame"),
+                },
+                customBillboard: {
+                    name: "Custom Billboard Text",
+                    val: "",
+                    html: () =>
+                    this.generateSetting(
+                        "text",
+                        "customBillboard",
+                        "Custom Billboard Text"
+                    ),
+                },
+                //Weapon
+                autoReload: {
+                    pre: "<br><div class='setHed'>Weapon</div>",
+                    name: "Auto Reload",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "autoReload"),
+                },
+                autoAim: {
+                    name: "Auto Aim Type",
+                    val: "off",
+                    html: () =>
+                    this.generateSetting("select", "autoAim", this.lists.autoAim),
+                },
+                frustrumCheck: {
+                    name: "Line of Sight Check",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "frustrumCheck"),
+                },
+                wallPenetrate: {
+                    name: "Aim through Penetratables",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "wallPenetrate"),
+                },
+                weaponZoom: {
+                    name: "Weapon Zoom",
+                    val: 1.0,
+                    min: 0,
+                    max: 50.0,
+                    step: 0.01,
+                    html: () => this.generateSetting("slider", "weaponZoom"),
+                    set: (value) => { if (this.renderer) this.renderer.adsFovMlt = value;}
+                },
+                weaponTrails: {
+                    name: "Weapon Trails",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "weaponTrails"),
+                    set: (value) => { if (this.me) this.me.weapon.trail = value;}
+                },
+                //Player
+                autoBhop: {
+                    pre: "<br><div class='setHed'>Player</div>",
+                    name: "Auto Bhop Type",
+                    val: "off",
+                    html: () => this.generateSetting("select", "autoBhop", this.lists.autoBhop),
+                },
+                thirdPerson: {
+                    name: "Third Person",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "thirdPerson"),
+                    set: (value, init) => {
+                        if (value) this.thirdPerson = 1;
+                        else if (!init) this.thirdPerson = undefined;
+                    }
+                },
+                skinUnlock: {
+                    name: "Unlock Skins",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "skinUnlock", this),
+                },
+                //GamePlay
+                disableWpnSnd: {
+                    pre: "<br><div class='setHed'>GamePlay</div>",
+                    name: "Disable Players Weapon Sounds",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "disableWpnSnd", this),
+                },
+                disableHckSnd: {
+                    name: "Disable Hacker Fart Sounds",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "disableHckSnd", this),
+                },
+                autoActivateNuke: {
+                    name: "Auto Activate Nuke",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "autoActivateNuke", this),
+                },
+                autoFindNew: {
+                    name: "New Lobby Finder",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "autoFindNew", this),
+                },
+                autoClick: {
+                    name: "Auto Start Game",
+                    val: false,
+                    html: () => this.generateSetting("checkbox", "autoClick", this),
+                },
+                inActivity: {
+                    name: "No InActivity Kick",
+                    val: true,
+                    html: () => this.generateSetting("checkbox", "autoClick", this),
+                },
+                //Radio Stream Player
+                playStream: {
+                    pre: "<br><div class='setHed'>Radio Stream Player</div>",
+                    name: "Stream Select",
+                    val: "off",
+                    html: () => this.generateSetting("select", "playStream", this.lists.audioStreams),
+                    set: (value) => {
+                        if (value == "off") {
+                            if ( this.settings.playStream.audio ) {
+                                this.settings.playStream.audio.pause();
+                                this.settings.playStream.audio.currentTime = 0;
+                                this.settings.playStream.audio = null;
+                            }
+                            return;
+                        }
+                        let url = this.settings.playStream.urls[value];
+                        if (!this.settings.playStream.audio) {
+                            this.settings.playStream.audio = new Audio(url);
+                            this.settings.playStream.audio.volume = this.settings.audioVolume.val||0.5
+                        } else {
+                            this.settings.playStream.audio.src = url;
+                        }
+                        this.settings.playStream.audio.load();
+                        this.settings.playStream.audio.play();
+                    },
+                    urls: {
+                        _2000s: 'http://0n-2000s.radionetz.de/0n-2000s.aac',
+                        _HipHopRNB: 'https://stream-mixtape-geo.ntslive.net/mixtape2',
+                        _Country: 'https://live.wostreaming.net/direct/wboc-waaifmmp3-ibc2',
+                        _Dance: 'http://streaming.radionomy.com/A-RADIO-TOP-40',
+                        _Pop: 'http://bigrradio.cdnstream1.com/5106_128',
+                        _Jazz: 'http://strm112.1.fm/ajazz_mobile_mp3',
+                        _Oldies: 'http://strm112.1.fm/60s_70s_mobile_mp3',
+                        _Club: 'http://strm112.1.fm/club_mobile_mp3',
+                        _Folk: 'https://freshgrass.streamguys1.com/irish-128mp3',
+                        _ClassicRock: 'http://1a-classicrock.radionetz.de/1a-classicrock.mp3',
+                        _Metal: 'http://streams.radiobob.de/metalcore/mp3-192',
+                        _DeathMetal: 'http://stream.laut.fm/beatdownx',
+                        _Classical: 'http://live-radio01.mediahubaustralia.com/FM2W/aac/',
+                        _Alternative: 'http://bigrradio.cdnstream1.com/5187_128',
+                        _Dubstep: 'http://streaming.radionomy.com/R1Dubstep?lang=en',
+                        _Lowfi: 'http://streams.fluxfm.de/Chillhop/mp3-256',
+                        _Oldskool: 'http://streams.90s90s.de/hiphop/mp3-128/',
+                    },
+                    audio: null,
+                },
+                audioVolume: {
+                    name: "Radio Volume",
+                    val: 0.5,
+                    min: 0,
+                    max: 1,
+                    step: 0.01,
+                    html: () => this.generateSetting("slider", "audioVolume"),
+                    set: (value) => { if (this.settings.playStream.audio) this.settings.playStream.audio.volume = value;}
+                },
+            };
+
+            const menu = window.windows[11];
+            menu.header = "Settings";
+            menu.gen = _ => {
+                var tmpHTML = `<div style='text-align:center'> <a onclick='window.open("https://discord.gg/bngY3TryZX")' class='menuLink'>Homeware-69 Settings</center></a> <hr> </div>`;
+                for (const key in this.settings) {
+                    if (this.settings[key].pre) tmpHTML += this.settings[key].pre;
+                    tmpHTML += "<div class='settName' id='" + key + "_div' style='display:" + (this.settings[key].hide ? 'none' : 'block') + "'>" + this.settings[key].name +
+                        " " + this.settings[key].html() + "</div>";
+                }
+                tmpHTML += `<br><hr><a onclick='${skidStr}.resetSettings()' class='menuLink'>Reset Settings</a> | <a onclick='${skidStr}.saveScript()' class='menuLink'>Save GameScript</a>`
+                return tmpHTML;
+            };
+
+            // setupSettings
+            for (const key in this.settings) {
+                this.settings[key].def = this.settings[key].val;
+                if (!this.settings[key].disabled) {
+                    let tmpVal = this.getSavedVal(key);
+                    this.settings[key].val = tmpVal !== null ? tmpVal : this.settings[key].val;
+                    if (this.settings[key].val == "false") this.settings[key].val = false;
+                    if (this.settings[key].val == "true") this.settings[key].val = true;
+                    if (this.settings[key].val == "undefined") this.settings[key].val = this.settings[key].def;
+                    if (this.settings[key].set) this.settings[key].set(this.settings[key].val, true);
+                }
+            }
+        }
+
+        generateSetting(type, name, extra) {
+            switch (type) {
+                case 'checkbox':
+                    return `<label class="switch"><input type="checkbox" onclick="${skidStr}.setSetting('${name}', this.checked)" ${this.settings[name].val ? 'checked' : ''}><span class="slider"></span></label>`;
+                case 'slider':
+                    return `<span class='sliderVal' id='slid_utilities_${name}'>${this.settings[name].val}</span><div class='slidecontainer'><input type='range' min='${this.settings[name].min}' max='${this.settings[name].max}' step='${this.settings[name].step}' value='${this.settings[name].val}' class='sliderM' oninput="${skidStr}.setSetting('${name}', this.value)"></div>`
+                    case 'select': {
+                        let temp = `<select onchange="${skidStr}.setSetting(\x27${name}\x27, this.value)" class="inputGrey2">`;
+                        for (let option in extra) {
+                            temp += '<option value="' + option + '" ' + (option == this.settings[name].val ? 'selected' : '') + '>' + extra[option] + '</option>';
+                        }
+                        temp += '</select>';
+                        return temp;
+                    }
+                default:
+                    return `<input type="${type}" name="${type}" id="slid_utilities_${name}"\n${'color' == type ? 'style="float:right;margin-top:5px"' : `class="inputGrey2" placeholder="${extra}"`}\nvalue="${this.settings[name].val}" oninput="${skidStr}.setSetting(\x27${name}\x27, this.value)"/>`;
+            }
+        }
+
+        resetSettings() {
+            if (confirm("Are you sure you want to reset all your settings? This will also refresh the page")) {
+                Object.keys(localStorage).filter(x => x.includes("kro_utilities_")).forEach(x => localStorage.removeItem(x));
+                location.reload();
+            }
+        }
+
+        setSetting(t, e) {
+            this.settings[t].val = e;
+            this.saveVal(t, e);
+            if (document.getElementById(`slid_utilities_${t}`)) document.getElementById(`slid_utilities_${t}`).innerHTML = e;
+            if (this.settings[t].set) this.settings[t].set(e);
+        }
+
+        createObserver(elm, check, callback, onshow = true) {
+            return new MutationObserver((mutationsList, observer) => {
+                if (check == 'src' || onshow && mutationsList[0].target.style.display == 'block' || !onshow) {
+                    callback(mutationsList[0].target);
+                }
+            }).observe(elm, check == 'childList' ? {childList: true} : {attributes: true, attributeFilter: [check]});
+        }
+
+        createListener(elm, type, callback = null) {
+            if (!this.isDefined(elm)) {
+                alert("Failed creating " + type + "listener");
+                return
+            }
+            elm.addEventListener(type, event => callback(event));
+        }
+
+        createElement(element, attribute, inner) {
+            if (!this.isDefined(element)) {
+                return null;
+            }
+            if (!this.isDefined(inner)) {
+                inner = "";
+            }
+            let el = document.createElement(element);
+            if (this.isType(attribute, 'object')) {
+                for (let key in attribute) {
+                    el.setAttribute(key, attribute[key]);
+                }
+            }
+            if (!Array.isArray(inner)) {
+                inner = [inner];
+            }
+            for (let i = 0; i < inner.length; i++) {
+                if (inner[i].tagName) {
+                    el.appendChild(inner[i]);
+                } else {
+                    el.appendChild(document.createTextNode(inner[i]));
+                }
+            }
+            return el;
+        }
+
+        createButton(name, iconURL, fn, visible) {
+            visible = visible ? "inherit":"none";
+            this.waitFor(_=>document.querySelector("#menuItemContainer")).then(menu => {
+                let icon = this.createElement("div",{"class":"menuItemIcon", "style":`background-image:url("${iconURL}");display:inherit;`});
+                let title= this.createElement("div",{"class":"menuItemTitle", "style":`display:inherit;`}, name);
+                let host = this.createElement("div",{"id":"mainButton", "class":"menuItem", "onmouseenter":"playTick()", "onclick":"showWindow(12)", "style":`display:${visible};`},[icon, title]);
+                if (menu) menu.append(host)
+            })
         }
 
         objectHas(obj, arr) {
             return arr.some(prop => obj.hasOwnProperty(prop));
-        }
-
-        createElement(type, html, id) {
-            let newElement = document.createElement(type)
-            if (id) newElement.id = id
-            newElement.innerHTML = html
-            return newElement
         }
 
         getVersion() {
@@ -160,9 +611,7 @@
         }
 
         saveAs(name, data) {
-            let blob = new Blob([data], {
-                type: 'text/plain'
-            });
+            let blob = new Blob([data], {type: 'text/plain'});
             let el = window.document.createElement("a");
             el.href = window.URL.createObjectURL(blob);
             el.download = name;
@@ -177,385 +626,304 @@
             })
         }
 
+        isKeyDown(key) {
+            return this.downKeys.has(key);
+        }
+
+        simulateKey(keyCode) {
+            var oEvent = document.createEvent('KeyboardEvent');
+            // Chromium Hack
+            Object.defineProperty(oEvent, 'keyCode', {
+                get : function() {
+                    return this.keyCodeVal;
+                }
+            });
+            Object.defineProperty(oEvent, 'which', {
+                get : function() {
+                    return this.keyCodeVal;
+                }
+            });
+
+            if (oEvent.initKeyboardEvent) {
+                oEvent.initKeyboardEvent("keypress", true, true, document.defaultView, keyCode, keyCode, "", "", false, "");
+            } else {
+                oEvent.initKeyEvent("keypress", true, true, document.defaultView, false, false, false, false, keyCode, 0);
+            }
+
+            oEvent.keyCodeVal = keyCode;
+
+            if (oEvent.keyCode !== keyCode) {
+                alert("keyCode mismatch " + oEvent.keyCode + "(" + oEvent.which + ")");
+            }
+
+            document.body.dispatchEvent(oEvent);
+        }
+
+        toggleMenu() {
+            let lock = document.pointerLockElement || document.mozPointerLockElement;
+            if (lock) document.exitPointerLock();
+            window.showWindow(12);
+            if (this.isDefined(window.SOUND)) window.SOUND.play(`tick_0`,0.1)
+        }
+
+        onLoad() {
+            this.waitFor(_=>document.documentElement instanceof window.HTMLElement).then(_=>{
+                this.iframe();
+            })
+            this.createObservers();
+            this.waitFor(_=>this.head, 1e4, _=> { this.head = document.head||document.getElementsByTagName('head')[0] }).then(head => {
+                if (!head) location.reload();
+                Object.entries(this.css).forEach(entry => {
+                    this.css[entry[0]] = this.createElement("style", entry[1]);
+                })
+                this.waitFor(_=>window.windows, 3e5).then(_ => {
+                    this.createSettings();
+                })
+            })
+
+            this.waitFor(_=>this.token).then(_ => {
+                if (!this.token) location.reload();
+                const loader = new Function("WP_fetchMMToken", "Module", this.gamePatch());
+                loader(new Promise(res=>res(this.token)), { csv: async () => 0 });
+            })
+            this.waitFor(_=>this.exports, 1e4).then(exports => {
+                if (!exports) return alert("This Script needs updating");
+                else {
+                    //console.dir(exports)
+                    let toFind = {
+                        overlay: ["render", "canvas"],
+                        config: ["accAnnounce", "availableRegions", "assetCat"],
+                        three: ["ACESFilmicToneMapping", "TextureLoader", "ObjectLoader"],
+                        ws: ["socketReady", "ingressPacketCount", "ingressPacketCount", "egressDataSize"],
+                        //utility: ["VectorAdd", "VectorAngleSign"],
+                        //colors: ["challLvl", "getChallCol"],
+                        //ui: ["showEndScreen", "toggleControlUI", "toggleEndScreen", "updatePlayInstructions"],
+                        //events: ["actions", "events"],
+                    }
+                    for (let rootKey in this.exports) {
+                        let exp = this.exports[rootKey].exports;
+                        for (let name in toFind) {
+                            if (this.objectHas(exp, toFind[name])) {
+                                console.log("Found Export ", name);
+                                delete toFind[name];
+                                this[name] = exp;
+                            }
+                        }
+                    }
+                    if (!(Object.keys(toFind).length === 0 && toFind.constructor === Object)) {
+                        for (let name in toFind) {
+                            alert("Failed To Find Export " + name);
+                        }
+                    } else {
+                        Object.defineProperty(this.config, "nameVisRate", {
+                            value: 0,
+                            writable: false,
+                            configurable: true,
+                        })
+                        this.ctx = this.overlay.canvas.getContext('2d');
+                        this.overlay.render = new Proxy(this.overlay.render, {
+                            apply: function(target, that, args) {
+                                return [target.apply(that, args), render.apply(that, args)]
+                            }
+                        })
+                        function render(scale, game, controls, renderer, me) {
+                            let width = skid.overlay.canvas.width / scale;
+                            let height = skid.overlay.canvas.height / scale;
+                            const renderArgs = [scale, game, controls, renderer, me];
+                            if (renderArgs && void 0 !== skid) {
+                                ["scale", "game", "controls", "renderer", "me"].forEach((item, index)=>{
+                                    skid[item] = renderArgs[index];
+                                });
+                                if (me) {
+                                    skid.ctx.save();
+                                    skid.ctx.scale(scale, scale);
+                                    //this.ctx.clearRect(0, 0, width, height);
+                                    skid.onRender();
+                                    //window.requestAnimationFrame.call(window, renderArgs.callee.caller.bind(this));
+                                    skid.ctx.restore();
+                                }
+                                if(skid.settings && skid.settings.autoClick.val && window.endUI.style.display == "none" && window.windowHolder.style.display == "none") {
+                                    controls.toggle(true);
+                                }
+                            }
+                        }
+
+                        // Skins
+                        const $skins = Symbol("skins");
+                        Object.defineProperty(Object.prototype, "skins", {
+                            set: function(fn) {
+                                this[$skins] = fn;
+                                if (void 0 == this.localSkins || !this.localSkins.length) {
+                                    this.localSkins = Array.apply(null, Array(5e3)).map((x, i) => {
+                                        return {
+                                            ind: i,
+                                            cnt: 0x1,
+                                        }
+                                    })
+                                }
+                                return fn;
+                            },
+                            get: function() {
+                                return skid.settings.skinUnlock.val && this.stats ? this.localSkins : this[$skins];
+                            }
+                        })
+
+                        this.waitFor(_=>this.ws.connected === true, 4e4).then(_=> {
+                            this.wsEvent = this.ws._dispatchEvent.bind(this.ws);
+                            this.wsSend = this.ws.send.bind(this.ws);
+                            this.ws.send = new Proxy(this.ws.send, {
+                                apply: function(target, that, args) {
+                                    if (args[0] == "ah2") return;
+                                    try {
+                                        var original_fn = Function.prototype.apply.apply(target, [that, args]);
+                                    } catch (e) {
+                                        e.stack = e.stack = e.stack.replace(/\n.*Object\.apply.*/, '');
+                                        throw e;
+                                    }
+
+                                    if (args[0] === "en") {
+                                        skid.skinCache = {
+                                            main: args[1][2][0],
+                                            secondary: args[1][2][1],
+                                            hat: args[1][3],
+                                            body: args[1][4],
+                                            knife: args[1][9],
+                                            dye: args[1][14],
+                                            waist: args[1][17],
+                                        }
+                                    }
+
+                                    return original_fn;
+                                }
+                            })
+
+                            this.ws._dispatchEvent = new Proxy(this.ws._dispatchEvent, {
+                                apply: function(target, that, [type, event]) {
+                                    if (type =="init") {
+                                        if(event[10] && event[10].length && event[10].bill && skid.settings.customBillboard.val.length > 1) {
+                                            event[10].bill.txt = skid.settings.customBillboard.val;
+                                        }
+                                    }
+
+                                    if (skid.settings.skinUnlock.val && skid.skinCache && type === "0") {
+                                        let skins = skid.skinCache;
+                                        let pInfo = event[0];
+                                        let pSize = 38;
+                                        while (pInfo.length % pSize !== 0) pSize++;
+                                        for(let i = 0; i < pInfo.length; i += pSize) {
+                                            if (pInfo[i] === skid.ws.socketId||0) {
+                                                pInfo[i + 12] = [skins.main, skins.secondary];
+                                                pInfo[i + 13] = skins.hat;
+                                                pInfo[i + 14] = skins.body;
+                                                pInfo[i + 19] = skins.knife;
+                                                pInfo[i + 24] = skins.dye;
+                                                pInfo[i + 33] = skins.waist;
+                                            }
+                                        }
+                                    }
+
+                                    return target.apply(that, arguments[2]);
+                                }
+                            })
+                        })
+
+                        if (this.isDefined(window.SOUND)) {
+                            window.SOUND.play = new Proxy(window.SOUND.play, {
+                                apply: function(target, that, [src, vol, loop, rate]) {
+                                    if ( src.startsWith("fart_") && skid.settings.disableHckSnd.val ) return;
+                                    return target.apply(that, [src, vol, loop, rate]);
+                                }
+                            })
+                        }
+
+                        AudioParam.prototype.setValueAtTime = new Proxy(AudioParam.prototype.setValueAtTime, {
+                            apply: function(target, that, [value, startTime]) {
+                                return target.apply(that, [value, 0]);
+                            }
+                        })
+
+                        this.rayC = new this.three.Raycaster();
+                        this.vec2 = new this.three.Vector2(0, 0);
+                    }
+                }
+            })
+        }
+
         gamePatch() {
             let entries = {
-                inView: {
-                    regex: /(\w+\['(\w+)']\){if\(\(\w+=\w+\['\w+']\['position']\['clone']\(\))/,
-                    index: 2
-                },
-                procInputs: {
-                    regex: /this\['(\w+)']=function\((\w+),(\w+),\w+,\w+\){(this)\['recon']/,
-                    index: 1
-                },
-                aimVal: {
-                    regex: /this\['(\w+)']-=0x1\/\(this\['weapon']\['\w+']\/\w+\)/,
-                    index: 1
-                },
-                didShoot: {
-                    regex: /--,\w+\['(\w+)']=!0x0/,
-                    index: 1
-                },
-                nAuto: {
-                    regex: /'Single\\x20Fire','varN':'(\w+)'/,
-                    index: 1
-                },
-                crouchVal: {
-                    regex: /this\['(\w+)']\+=\w\['\w+']\*\w+,0x1<=this\['\w+']/,
-                    index: 1
-                },
-                ammos: {
-                    regex: /\['length'];for\(\w+=0x0;\w+<\w+\['(\w+)']\['length']/,
-                    index: 1
-                },
-                weaponIndex: {
-                    regex: /\['weaponConfig']\[\w+]\['secondary']&&\(\w+\['(\w+)']==\w+/,
-                    index: 1
-                },
-                objInstances: {
-                    regex: /\w+\['\w+']\(0x0,0x0,0x0\);if\(\w+\['(\w+)']=\w+\['\w+']/,
-                    index: 1
-                },
-                //reloadTimer: {regex: /this\['(\w+)']&&\(\w+\['\w+']\(this\),\w+\['\w+']\(this\)/, index: 1},
-                reloadTimer: {
-                    regex: /0x0>=this\['(\w+')]&&0x0>=this\['swapTime']/,
-                    index: 1
-                },
-                recoilAnimY: {
-                    regex: /this\['(\w+)']\+=this\['\w+']\*\(/,
-                    index: 1
-                },
-                maxHealth: {
-                    regex: /this\['health']\/this\['(\w+)']\?/,
-                    index: 1
-                },
+                // Deobfu
+                inView: { regex: /(\w+\['(\w+)']\){if\(\(\w+=\w+\['\w+']\['position']\['clone']\(\))/, index: 2 },
+                spectating: { regex: /\['team']:window\['(\w+)']/, index: 1 },
+                //inView: { regex: /\]\)continue;if\(!\w+\['(.+?)\']\)continue;/, index: 1 },
+                //canSee: { regex: /\w+\['(\w+)']\(\w+,\w+\['x'],\w+\['y'],\w+\['z']\)\)&&/, index: 1 },
+                //procInputs: { regex: /this\['(\w+)']=function\((\w+),(\w+),\w+,\w+\){(this)\['recon']/, index: 1 },
+                aimVal: { regex: /this\['(\w+)']-=0x1\/\(this\['weapon']\['\w+']\/\w+\)/, index: 1 },
+                pchObjc: { regex: /0x0,this\['(\w+)']=new \w+\['Object3D']\(\),this/, index: 1 },
+                didShoot: { regex: /--,\w+\['(\w+)']=!0x0/, index: 1 },
+                nAuto: { regex: /'Single\\x20Fire','varN':'(\w+)'/, index: 1 },
+                crouchVal: { regex: /this\['(\w+)']\+=\w\['\w+']\*\w+,0x1<=this\['\w+']/, index: 1 },
+                recoilAnimY: { regex: /\+\(-Math\['PI']\/0x4\*\w+\+\w+\['(\w+)']\*\w+\['\w+']\)\+/, index: 1 },
+                //recoilAnimY: { regex: /this\['recoilAnim']=0x0,this\[(.*?\(''\))]/, index: 1 },
+                ammos: { regex: /\['length'];for\(\w+=0x0;\w+<\w+\['(\w+)']\['length']/, index: 1 },
+                weaponIndex: { regex: /\['weaponConfig']\[\w+]\['secondary']&&\(\w+\['(\w+)']==\w+/, index: 1 },
+                isYou: { regex: /0x0,this\['(\w+)']=\w+,this\['\w+']=!0x0,this\['inputs']/, index: 1 },
+                objInstances: { regex: /\w+\['\w+']\(0x0,0x0,0x0\);if\(\w+\['(\w+)']=\w+\['\w+']/, index: 1 },
+                getWorldPosition: { regex: /{\w+=\w+\['camera']\['(\w+)']\(\);/, index: 1 },
+                //mouseDownL: { regex: /this\['\w+'\]=function\(\){this\['(\w+)'\]=\w*0,this\['(\w+)'\]=\w*0,this\['\w+'\]={}/, index: 1 },
+                mouseDownR: { regex: /this\['(\w+)']=0x0,this\['keys']=/, index: 1 },
+                //reloadTimer: { regex:  /this\['(\w+)']&&\(\w+\['\w+']\(this\),\w+\['\w+']\(this\)/, index: 1 },
+                maxHealth: { regex: /this\['health']\/this\['(\w+)']\?/, index: 1 },
+                xDire: { regex: /this\['(\w+)']=Math\['lerpAngle']\(this\['xDir2']/, index: 1 },
+                yDire: { regex: /this\['(\w+)']=Math\['lerpAngle']\(this\['yDir2']/, index: 1 },
                 //xVel: { regex: /this\['x']\+=this\['(\w+)']\*\w+\['map']\['config']\['speedX']/, index: 1 },
-                yVel: {
-                    regex: /this\['y']\+=this\['(\w+)']\*\w+\['map']\['config']\['speedY']/,
-                    index: 1
-                },
+                yVel: { regex: /this\['y']\+=this\['(\w+)']\*\w+\['map']\['config']\['speedY']/, index: 1 },
                 //zVel: { regex: /this\['z']\+=this\['(\w+)']\*\w+\['map']\['config']\['speedZ']/, index: 1 },
+
                 // Patches
-                socket: {
-                    regex: /\['onopen']=\(\)=>{/,
-                    patch: `$&${dogStr}.socket=this;`
-                },
-                //frustum: {regex: /(;const (\w+)=this\['frustum']\['containsPoint'];.*?return)!0x1/, patch: "$1 $2"},
-                //videoAds: {regex: /!function\(\){var \w+=document\['createElement']\('script'\);.*?}\(\);/, patch: ""},
-                anticheat1: {
-                    regex: /(\[]instanceof Array;).*?(var)/,
-                    patch: "$1 $2"
-                },
-                anticheat2: {
-                    regex: /windows\['length'\]>\d+.*?0x25/,
-                    patch: "0x25"
-                },
-                writeable: {
-                    regex: /'writeable':!0x1/g,
-                    patch: "writeable:true"
-                },
-                configurable: {
-                    regex: /'configurable':!0x1/g,
-                    patch: "configurable:true"
-                },
-                typeError: {
-                    regex: /throw new TypeError/g,
-                    patch: "console.error"
-                },
-                error: {
-                    regex: /throw new Error/g,
-                    patch: "console.error"
-                },
-                //exports: {regex: /(this\['\w+']\['\w+']\(this\);};},function\(\w+,\w+,(\w+)\){)/, patch: `$1 ${dogStr}.exports=$2.c; ${dogStr}.modules=$2.m;`},
-                inputs: {
-                    regex: /(\w+\['\w+']\[\w+\['\w+']\['\w+']\?'\w+':'push']\()(\w+)\),/,
-                    patch: `$1${dogStr}.inputs($2)),`
-                },
-                nametags: {
-                    regex: /&&(\w+\['\w+'])\){(if\(\(\w+=\w+\['\w+']\['\w+']\['\w+'])/,
-                    patch: `){if(!$1&&!${dogStr}.state.nameTags)continue;$2`
-                },
-                wallbangs: {
-                    regex: /!(\w+)\['transparent']/,
-                    patch: `${dogStr}.settings.wallbangs?!$1.penetrable : !$1.transparent`
-                },
-                thirdPerson: {
-                    regex: /(\w+)\[\'config\'\]\[\'thirdPerson\'\]/g,
-                    patch: `${dogStr}.settings.thirdPerson`
-                },
+                exports: {regex: /(this\['\w+']\['\w+']\(this\);};},function\(\w+,\w+,(\w+)\){)/, patch: `$1 ${skidStr}.exports=$2.c; ${skidStr}.modules=$2.m;`},
+                inputs: {regex: /(\w+\['\w+']\[\w+\['\w+']\['\w+']\?'\w+':'push']\()(\w+)\),/, patch: `$1${skidStr}.onInput($2)),`},
+                inView: {regex: /&&(\w+\['\w+'])\){(if\(\(\w+=\w+\['\w+']\['\w+']\['\w+'])/, patch: `){if(!$1&&void 0 !== ${skidStr}.nameTags)continue;$2`},
+                thirdPerson:{regex: /(\w+)\[\'config\'\]\[\'thirdPerson\'\]/g, patch: `void 0 !== ${skidStr}.thirdPerson`},
+                isHacker:{regex: /(window\['\w+']=)!0x0\)/, patch: `$1!0x1)`},
+                fixHowler:{regex: /(Howler\['orientation'](.+?)\)\),)/, patch: ``},
+                respawnT:{regex: /'\w+':0x3e8\*/g, patch: `'respawnT':0x0*`},
+                anticheat1:{regex: /&&\w+\(\),window\['utilities']&&\(\w+\(null,null,null,!0x0\),\w+\(\)\)/, patch: ""},
+                anticheat2:{regex: /(\[]instanceof Array;).*?(var)/, patch: "$1 $2"},
+                anticheat3:{regex: /windows\['length'\]>\d+.*?0x25/, patch: `0x25`},
+                commandline:{regex: /Object\['defineProperty']\(console.*?\),/, patch: ""},
+                writeable:{regex: /'writeable':!0x1/g, patch: "writeable:true"},
+                configurable:{regex: /'configurable':!0x1/g, patch: "configurable:true"},
+                typeError:{regex: /throw new TypeError/g, patch: "console.error"},
+                error:{regex: /throw new Error/g, patch: "console.error"},
             };
             let script = this.gameJS;
-            for (let name in entries) {
+            for(let name in entries) {
                 let object = entries[name];
                 let found = object.regex.exec(script);
                 if (object.hasOwnProperty('index')) {
                     if (!found) {
                         object.val = null;
-                        //alert("Failed to Find " + name);
-                        console.error("Failed to Find " + name);
+                        alert("Failed to Find " + name);
                     } else {
                         object.val = found[object.index];
-                        console.log("Found ", name, ":", object.val);
+                        console.log ("Found ", name, ":", object.val);
                     }
-                    Object.defineProperty(dog.vars, name, {
+                    Object.defineProperty(skid.vars, name, {
                         configurable: false,
                         value: object.val
                     });
                 } else if (found) {
                     script = script.replace(object.regex, object.patch);
-                    console.log("Patched ", name);
-                } else console.error("Failed to Patch " + name); //alert("Failed to Patch " + name);
+                    console.log ("Patched ", name);
+                } else alert("Failed to Patch " + name);
             }
             return script;
-        }
-
-        async fetchScript() {
-            const data = await this.request("https://krunker.io/social.html", "text");
-            const buffer = await this.request("https://krunker.io/pkg/krunker." + /\w.exports="(\w+)"/.exec(data)[1] + ".vries", "arrayBuffer");
-            const array = Array.from(new Uint8Array(buffer));
-            const xor = array[0] ^ '!'.charCodeAt(0);
-            return array.map((code) => String.fromCharCode(code ^ xor)).join('');
-        }
-
-        async request(url, type, opt = {}) {
-            return fetch(url, opt).then(response => {
-                if (!response.ok) {
-                    throw new Error("Network response from " + url + " was not ok")
-                }
-                return response[type]()
-            })
-        }
-
-        async waitFor(test, timeout_ms = 2e4, doWhile = null) {
-            let sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-            return new Promise(async (resolve, reject) => {
-                if (typeof timeout_ms != "number") reject("Timeout argument not a number in waitFor(selector, timeout_ms)");
-                let result, freq = 100;
-                while (result === undefined || result === false || result === null || result.length === 0) {
-                    if (doWhile && doWhile instanceof Function) doWhile();;
-                    if (timeout_ms % 10000 < freq) console.log("waiting for: ", test);
-                    if ((timeout_ms -= freq) < 0) {
-                        console.log("Timeout : ", test);
-                        resolve(false);
-                        return;
-                    }
-                    await sleep(freq);
-                    result = typeof test === "string" ? Function(test)() : test();
-                }
-                console.log("Passed : ", test);
-                resolve(result);
-            });
-        };
-
-        async hooking() {
-            await this.waitFor(_ => this.isDefined(this.socket))
-            if (!this.isDefined(this.socket)) location.assign(location.origin);
-            this.wsEvent = this.socket._dispatchEvent.bind(this.socket);
-            this.wsSend = this.socket.send.bind(this.socket);
-            this.socket.send = new Proxy(this.socket.send, {
-                apply(target, that, args) {
-                    if (args[0] === "en") {
-                        that.skinCache = {
-                            main: args[1][2][0],
-                            secondary: args[1][2][1],
-                            hat: args[1][3],
-                            body: args[1][4],
-                            knife: args[1][9],
-                            dye: args[1][14],
-                            waist: args[1][17],
-                        }
-                    }
-                    return Reflect.apply(...arguments);
-                }
-            })
-            this.socket._dispatchEvent = new Proxy(this.socket._dispatchEvent, {
-                apply(target, that, args) {
-                    if (dog.settings.skinHack && that.skinCache && args[0] === "0") {
-                        let pInfo = args[1][0];
-                        let pSize = 38;
-                        while (pInfo.length % pSize !== 0) pSize++;
-                        for (let i = 0; i < pInfo.length; i += pSize) {
-                            if (pInfo[i] === that.socketId || 0) {
-                                pInfo[i + 12] = [that.skinCache.main, that.skinCache.secondary];
-                                pInfo[i + 13] = that.skinCache.hat;
-                                pInfo[i + 14] = that.skinCache.body;
-                                pInfo[i + 19] = that.skinCache.knife;
-                                pInfo[i + 24] = that.skinCache.dye;
-                                pInfo[i + 33] = that.skinCache.waist;
-                            }
-                        }
-                    }
-
-                    return target.apply(that, args);
-                }
-            })
-
-            await this.waitFor(_ => this.isDefined(this.overlay))
-            this.ctx = this.overlay.canvas.getContext('2d');
-            this.overlay.render = new Proxy(this.overlay.render, {
-                apply(target, that, args) {
-                    ["scale", "game", "controls", "renderer", "me"].forEach((item, index) => {
-                        dog[item] = args[index]
-                    });
-                    Reflect.apply(...arguments);
-                    if (dog.me && dog.ctx) {
-                        dog.ctx.save();
-                        dog.ctx.scale(dog.scale, dog.scale);
-                        dog.render();
-                        dog.ctx.restore();
-                    }
-                }
-            })
-
-            this.cleanGUI();
-            this.customCSS();
-            await this.waitFor(_ => this.isDefined(window.windows));
-            this.initGUI();
-        }
-
-        defines() {
-            const $origSkins = Symbol("origSkins"),
-                  $localSkins = Symbol("localSkins");
-
-            Object.defineProperties(Object.prototype, {
-                canvas: {
-                    set(val) {
-                        this._value = val;
-                    },
-                    get() {
-                        let object = this;
-                        if (dog.objectHas(object, ["healthColE", "healthColT", "dmgColor"])) {
-                            dog.overlay = this;
-                        }
-                        return this._value;
-                    }
-                },
-                RENDER: {
-                    set(val) {
-                        this._value = val;
-                        dog.renderer = this._value;
-
-                        Object.defineProperty(this._value, "adsFovMlt", {
-                            get() {
-                                return dog.settings.weaponZoom
-                            }
-                        })
-
-                        dog.fxComposer = this;
-                    },
-                    get() {
-                        return this._value;
-                    }
-                },
-                OBJLoader: {
-                    set(val) {
-                        dog.three = this;
-                        this._value = val;
-                    },
-                    get() {
-                        return this._value;
-                    }
-                },
-                skins: {
-                    set(fn) {
-                        this[$origSkins] = fn;
-                        if (void 0 == this.localSkins || !this.localSkins.length) {
-                            this[$localSkins] = Array.apply(null, Array(5e3)).map((x, i) => {
-                                return {
-                                    ind: i,
-                                    cnt: 0x1,
-                                }
-                            })
-                        }
-                        return fn;
-                    },
-                    get() {
-                        return dog.settings.skinHack && this.stats ? this[$localSkins] : this[$origSkins];
-                    }
-                },
-                useLooseClient: {
-                    enumerable: false,
-                    get() {
-                        return this._ulc
-                    },
-                    set(v) {
-                        //dog.config = this
-                        // Increase the rate in which inView is updated to every frame, making aimbot way more responsive
-                        Object.defineProperty(this, "nameVisRate", {
-                            value: 0,
-                            writable: false,
-                            configurable: true,
-                        })
-                        this._ulc = v
-                    }
-                },
-                trail: { // All weapon tracers
-                    enumerable: false,
-                    get() {
-                        return dog.settings.alwaysTrail || this._trail
-                    },
-                    set(v) {
-                        this._trail = v
-                    }
-                },
-                showTracers: {
-                    enumerable: false,
-                    get() {
-                        return dog.settings.alwaysTrail || this._showTracers
-                    },
-                    set(v) {
-                        this._showTracers = v
-                    }
-                },
-                shaderId: { // Animated billboards
-                    enumerable: false,
-                    get() {
-                        if (this.src && this.src.startsWith("pubs/")) return dog.settings.animatedBillboards ? 1 : this.rshaderId;
-                        else return this.rshaderId
-                    },
-                    set(v) {
-                        this.rshaderId = v
-                    }
-                },
-                // Clientside prevention of inactivity kick
-                idleTimer: {
-                    enumerable: false,
-                    get() {
-                        return dog.settings.antikick ? 0 : this._idleTimer
-                    },
-                    set(v) {
-                        this._idleTimer = v
-                    }
-                },
-                kickTimer: {
-                    enumerable: false,
-                    get() {
-                        return dog.settings.antikick ? Infinity : this._kickTimer
-                    },
-                    set(v) {
-                        this._kickTimer = v
-                    }
-                },
-            })
-
-            // disable audioparam errors
-            Object.keys(AudioParam.prototype).forEach(name => {
-                if (Object.getOwnPropertyDescriptor(AudioParam.prototype, name).get) return
-                const old = AudioParam.prototype[name]
-                AudioParam.prototype[name] = function() {
-                    try {
-                        return old.apply(this, arguments)
-                    } catch (e) {
-                        console.log("AudioParam error:\n" + e)
-                        return false
-                    }
-                }
-            })
         }
 
         iframe() {
             const iframe = document.createElement('iframe');
             iframe.setAttribute('style', 'display:none');
-            iframe.setAttribute("id", dogStr);
+            iframe.setAttribute("id", skidStr);
             iframe.src = location.origin;
             document.documentElement.appendChild(iframe);
 
@@ -566,17 +934,17 @@
                 apply: function(target, that, args) {
                     let string = Reflect.apply(...arguments);
                     if (string.length > 1e6) {
-                        if (!dog.gameJS) {
-                            dog.gameJS = string;
+                        if (!skid.gameJS) {
+                            skid.gameJS = string;
                             console.log("1stSTR");
                         } else {
-                            dog.gameJS += string;
+                            skid.gameJS += string;
                             console.log("2ndSTR");
                         }
                     }
-                    if (string.includes("generate-token")) dog.generated = true;
-                    else if (string.length == 40||dog.generated) {
-                        dog.token = string;
+                    if (string.includes("generate-token")) skid.generated = true;
+                    else if (string.length == 40||skid.generated) {
+                        skid.token = string;
                         console.log("Token ", string);
                         document.documentElement.removeChild(iframe);
                     }
@@ -601,35 +969,26 @@
                 childList: true,
                 subtree: true
             });
-        }
 
-        createListeners() {
-
-            window.addEventListener("mouseup", (e) => {
-                if (e.which === 2 && dog.settings.guiOnMMB) {
-                    e.preventDefault()
-                    dog.showGUI()
-                }
-            })
-            window.addEventListener("keyup", event => {
-                if (this.state.pressedKeys.has(event.code)) this.state.pressedKeys.delete(event.code)
-                if (!(document.activeElement.tagName === "INPUT" || !window.endUI && window.endUI.style.display) && dog.settings.keybinds) {
-                    switch (event.code) {
-                        case "KeyY":
-                            this.state.bindAimbotOn = !this.state.bindAimbotOn
-                            this.wsEvent("ch", [null, ("Aimbot " + (this.state.bindAimbotOn ? "on" : "off")), 1])
-                            break
-                        case "KeyH":
-                            this.settings.esp = (this.settings.esp + 1) % 4
-                            this.wsEvent("ch", [null, "ESP: " + ["disabled", "nametags", "box", "full"][this.settings.esp], 1])
-                            break
+            this.waitFor(_=>window.instructionsUpdate, 2e3).then(_ => {
+                this.createObserver(window.instructionsUpdate, 'style', (target) => {
+                    if (this.settings.autoFindNew.val) {
+                        console.log(target)
+                        if (['Kicked', 'Banned', 'Disconnected', 'Error', 'Game is full'].some(text => target && target.innerHTML.includes(text))) {
+                            location = document.location.origin;
+                        }
                     }
-                }
+                });
             })
-            window.addEventListener("keydown", event => {
+
+            this.createListener(document, "keyup", event => {
+                if (this.downKeys.has(event.code)) this.downKeys.delete(event.code)
+            })
+
+            this.createListener(document, "keydown", event => {
                 if (event.code == "F1") {
                     event.preventDefault();
-                    dog.showGUI();
+                    this.toggleMenu();
                 }
                 if ('INPUT' == document.activeElement.tagName || !window.endUI && window.endUI.style.display) return;
                 switch (event.code) {
@@ -639,471 +998,160 @@
                         console.dirxml(this)
                         break;
                     default:
-                        if (!this.state.pressedKeys.has(event.code)) this.state.pressedKeys.add(event.code);
+                        if (!this.downKeys.has(event.code)) this.downKeys.add(event.code);
+                        break;
+                }
+            })
+
+            this.createListener(document, "mouseup", event => {
+                switch (event.button) {
+                    case 1:
+                        event.preventDefault();
+                        this.toggleMenu();
+                        break;
+                    default:
                         break;
                 }
             })
         }
 
-        inputs(input) {
-            const key = {
-                frame: 0,
-                delta: 1,
-                xdir: 2,
-                ydir: 3,
-                moveDir: 4,
-                shoot: 5,
-                scope: 6,
-                jump: 7,
-                reload: 8,
-                crouch: 9,
-                weaponScroll: 10,
-                weaponSwap: 11,
-                moveLock: 12
+        onRender() { /* hrt / ttap - https://github.com/hrt */
+            this.renderFrame ++;
+            if (this.renderFrame >= 100000) this.renderFrame = 0;
+            let scaledWidth = this.ctx.canvas.width / this.scale;
+            let scaledHeight = this.ctx.canvas.height / this.scale;
+            let playerScale = (2 * this.consts.armScale + this.consts.chestWidth + this.consts.armInset) / 2
+            let worldPosition = this.renderer.camera[this.vars.getWorldPosition]();
+            let espVal = this.settings.renderESP.val;
+            if (espVal ==="walls"||espVal ==="twoD") this.nameTags = undefined; else this.nameTags = true;
+
+            if (this.settings.autoActivateNuke.val && this.me && Object.keys(this.me.streaks).length) { /*chonker*/
+                this.wsSend("k", 0);
             }
 
-            const moveDir = {
-                leftStrafe: 0,
-                forward: 1,
-                rightStrafe: 2,
-                right: 3,
-                backwardRightStrafe: 4,
-                backward: 5,
-                backwardLeftStrafe: 6,
-                left: 7
+            if (espVal !== "off") {
+                this.overlay.healthColE = this.settings.rainbowColor.val ? this.overlay.rainbow.col : "#eb5656";
             }
 
-            this.state.frame = input[key.frame];
-            this.state.nameTags = [1, 2].some(n => n == this.settings.esp) || this.settings.forceNametagsOn;
-
-            if (this.me) {
-
-                // AUTO NUKE
-                if (this.settings.autoNuke && Object.keys(this.me.streaks).length) {
-                    this.wsSend("k", 0)
+            for (let iter = 0, length = this.game.players.list.length; iter < length; iter++) {
+                let player = this.game.players.list[iter];
+                if (player[this.vars.isYou] || !player.active || !this.isDefined(player[this.vars.objInstances]) || this.getIsFriendly(player)) {
+                    continue;
                 }
 
-                //AUTO BHOP
-                if (this.settings.bhop) {
-                    if (this.state.pressedKeys.has("Space") || this.settings.bhop % 2) {
-                        this.controls.keys[this.controls.binds.jumpKey.val] ^= 1;
-                        if (this.controls.keys[this.controls.binds.jumpKey.val]) {
-                            this.controls.didPressed[this.controls.binds.jumpKey.val] = 1;
-                        }
-                        if (this.state.pressedKeys.has("Space") || this.settings.bhop == 3) {
-                            if (this.me[this.vars.yVel] < -0.03 && this.me.canSlide) {
-                                setTimeout(() => {
-                                    this.controls.keys[this.controls.binds.crouchKey.val] = 0;
-                                }, this.me.slideTimer || 325);
-                                this.controls.keys[this.controls.binds.crouchKey.val] = 1;
-                                this.controls.didPressed[this.controls.binds.crouchKey.val] = 1;
+                // the below variables correspond to the 2d box esps corners
+                let xmin = Infinity;
+                let xmax = -Infinity;
+                let ymin = Infinity;
+                let ymax = -Infinity;
+                let position = null;
+                let br = false;
+                for (let j = -1; !br && j < 2; j+=2) {
+                    for (let k = -1; !br && k < 2; k+=2) {
+                        for (let l = 0; !br && l < 2; l++) {
+                            if (position = player[this.vars.objInstances].position.clone()) {
+                                position.x += j * playerScale;
+                                position.z += k * playerScale;
+                                position.y += l * (player.height - player[this.vars.crouchVal] * this.consts.crouchDst);
+                                if (!this.containsPoint(position)) {
+                                    br = true;
+                                    break;
+                                }
+                                position.project(this.renderer.camera);
+                                xmin = Math.min(xmin, position.x);
+                                xmax = Math.max(xmax, position.x);
+                                ymin = Math.min(ymin, position.y);
+                                ymax = Math.max(ymax, position.y);
                             }
                         }
                     }
                 }
 
-                // Makes nametags show in custom games, where nametags are disabled
-                if (this.settings.forceNametagsOn) {
-                    try {
-                        Object.defineProperty(this.game.config, "nameTags", {
-                            get() {
-                                return dog.settings.forceNametagsOn ? false : this.game._nametags
-                            },
-                            set(v) {
-                                this.game._nametags = v
-                            }
-                        })
-                    } catch (e) {}
+                if (br) {
+                    continue;
                 }
 
+                xmin = (xmin + 1) / 2;
+                ymin = (ymin + 1) / 2;
+                xmax = (xmax + 1) / 2;
+                ymax = (ymax + 1) / 2;
 
-                if (this.settings.spinBot) {
-                    const rate = 1
-                    input[key.moveDir] !== -1 && (input[key.moveDir] = (input[key.moveDir] + this.state.spinCounter - Math.round(7 * (input[key.ydir] / (Math.PI * 2000)))) % 7)
-                    input[key.ydir] = this.state.spinCounter / 7 * (Math.PI * 2000)
-                    input[key.frame] % rate === 0 && (this.state.spinCounter = (this.state.spinCounter + 1) % 7)
+                // save and restore these variables later so they got nothing on us
+                const original_strokeStyle = this.ctx.strokeStyle;
+                const original_lineWidth = this.ctx.lineWidth;
+                const original_font = this.ctx.font;
+                const original_fillStyle = this.ctx.fillStyle;
+
+                //Tracers
+                if (this.settings.renderTracers.val) {
+                    CRC2d.save.apply(this.ctx, []);
+                    let screenPos = this.world2Screen(player[this.vars.objInstances].position);
+                    this.ctx.lineWidth = 4.5;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.ctx.canvas.width/2, this.ctx.canvas.height - (this.ctx.canvas.height - scaledHeight));
+                    this.ctx.lineTo(screenPos.x, screenPos.y);
+                    this.ctx.strokeStyle = "rgba(0, 0, 0, 0.25)";
+                    this.ctx.stroke();
+                    this.ctx.lineWidth = 2.5;
+                    this.ctx.strokeStyle = this.settings.rainbowColor.val ? this.overlay.rainbow.col : "#eb5656"
+                    this.ctx.stroke();
+                    CRC2d.restore.apply(this.ctx, []);
                 }
 
-                // AUTO SWAP (not working idk why)
-                // if (this.settings.autoSwap && !this.me.weapon.secondary && this.me[this.vars.ammos][0] === 0 && this.me[this.vars.ammos][1] > 0 && !this.me.swapTime && !this.me[this.vars.reloadTimer]) {
-                // 	input[key.weaponSwap] = 1
-                //}
+                CRC2d.save.apply(this.ctx, []);
+                if (espVal == "twoD" || espVal == "full") {
+                    // perfect box esp
+                    this.ctx.lineWidth = 5;
+                    this.ctx.strokeStyle = this.settings.rainbowColor.val ? this.overlay.rainbow.col : "#eb5656"
+                    let distanceScale = Math.max(.3, 1 - this.getD3D(worldPosition.x, worldPosition.y, worldPosition.z, player.x, player.y, player.z) / 600);
+                    CRC2d.scale.apply(this.ctx, [distanceScale, distanceScale]);
+                    let xScale = scaledWidth / distanceScale;
+                    let yScale = scaledHeight / distanceScale;
+                    CRC2d.beginPath.apply(this.ctx, []);
+                    ymin = yScale * (1 - ymin);
+                    ymax = yScale * (1 - ymax);
+                    xmin = xScale * xmin;
+                    xmax = xScale * xmax;
+                    CRC2d.moveTo.apply(this.ctx, [xmin, ymin]);
+                    CRC2d.lineTo.apply(this.ctx, [xmin, ymax]);
+                    CRC2d.lineTo.apply(this.ctx, [xmax, ymax]);
+                    CRC2d.lineTo.apply(this.ctx, [xmax, ymin]);
+                    CRC2d.lineTo.apply(this.ctx, [xmin, ymin]);
+                    CRC2d.stroke.apply(this.ctx, []);
 
-                // AUTO RELOAD
-                if (this.settings.autoReload && this.me[this.vars.ammos][this.me[this.vars.weaponIndex]] === 0) {
-                    input[key.reload] = 1
-                }
-
-                // PITCH HACK
-                if (this.settings.pitchHack) {
-                    switch (this.settings.pitchHack) {
-                        case 1:
-                            input[key.xdir] = -Math.PI * 500
-                            break
-                        case 2:
-                            input[key.xdir] = Math.PI * 500
-                            break
-                        case 3:
-                            input[key.xdir] = Math.sin(Date.now() / 50) * Math.PI * 500
-                            break
-                        case 4:
-                            input[key.xdir] = Math.sin(Date.now() / 250) * Math.PI * 500
-                            break
-                        case 5:
-                            input[key.xdir] = input[key.frame] % 2 ? Math.PI * 500 : -Math.PI * 500
-                            break
-                        case 6:
-                            input[key.xdir] = (Math.random() * Math.PI - Math.PI / 2) * 1000
-                            break
+                    if (espVal == "full") {
+                        // health bar
+                        this.ctx.fillStyle = "#000000";
+                        let barMaxHeight = ymax - ymin;
+                        CRC2d.fillRect.apply(this.ctx, [xmin - 7, ymin, -10, barMaxHeight]);
+                        this.ctx.fillStyle = player.health > 75 ? "green" : player.health > 40 ? "orange" : "red";
+                        CRC2d.fillRect.apply(this.ctx, [xmin - 7, ymin, -10, barMaxHeight * (player.health / player[this.vars.maxHealth])]);
+                        // info
+                        this.ctx.font = "Bold 48px Tahoma";
+                        this.ctx.fillStyle = "white";
+                        this.ctx.strokeStyle='black';
+                        this.ctx.lineWidth = 1;
+                        let x = xmax + 7;
+                        let y = ymax;
+                        CRC2d.fillText.apply(this.ctx, [player.name||player.alias, x, y]);
+                        CRC2d.strokeText.apply(this.ctx, [player.name||player.alias, x, y]);
+                        this.ctx.font = "Bold 30px Tahoma";
+                        this.ctx.fillStyle = "#cccccc";
+                        y += 35;
+                        CRC2d.fillText.apply(this.ctx, [player.weapon.name, x, y]);
+                        CRC2d.strokeText.apply(this.ctx, [player.weapon.name, x, y]);
+                        y += 35;
+                        this.ctx.fillStyle = player.health > 75 ? "green" : player.health > 40 ? "orange" : "red";
+                        CRC2d.fillText.apply(this.ctx, [player.health + ' HP', x, y]);
+                        CRC2d.strokeText.apply(this.ctx, [player.health + ' HP', x, y]);
                     }
                 }
 
-                // Add the `pos` property to Players and AIs
-                const getNoise = () => (Math.random() * 2 - 1) * this.settings.aimNoise
-                this.game.players.list.forEach(v => {
-                    v.pos = {
-                        x: v.x,
-                        y: v.y,
-                        z: v.z
-                    };
-                    v.npos = {
-                        x: v.x + getNoise(),
-                        y: v.y + getNoise(),
-                        z: v.z + getNoise()
-                    };
-                    v.isTarget = false
-                })
-                if (this.game.AI.ais) {
-                    this.game.AI.ais.forEach(v => v.npos = v.pos = {
-                        x: v.x,
-                        y: v.y,
-                        z: v.z
-                    })
-                }
-
-                // AIMBOT
-                if (this.renderer && this.renderer.frustum && this.me.active) {
-                    this.controls.target = null
-
-                    // Finds all the visible enemies
-                    let targets = this.game.players.list.filter(enemy => !enemy.isYTMP && enemy.hasOwnProperty('npos') && (!this.settings.frustumCheck || this.containsPoint(enemy.npos)) && ((this.me.team === null || enemy.team !== this.me.team) && enemy.health > 0 && enemy[this.vars.inView])).sort((e, e2) => this.getDistance(this.me.x, this.me.z, e.npos.x, e.npos.z) - this.getDistance(this.me.x, this.me.z, e2.npos.x, e2.npos.z));
-                    let target = targets[0];
-
-                    // If there's a fov box, pick an enemy inside it instead (if there is)
-                    if (this.settings.fovbox) {
-                        const scale = this.scale || parseFloat(document.getElementById("uiBase").style.transform.match(/\((.+)\)/)[1])
-                        const width = innerWidth / scale,
-                              height = innerHeight / scale
-
-                        let foundTarget = false
-                        for (let i = 0; i < targets.length; i++) {
-                            const t = targets[i]
-                            const sp = this.world2Screen(new this.three.Vector3(t.x, t.y, t.z), width, height, t.height / 2)
-                            let fovBox = [width / 3, height / 4, width * (1 / 3), height / 2]
-                            switch (this.settings.fovBoxSize) {
-                                    // medium
-                                case 2:
-                                    fovBox = [width * 0.4, height / 3, width * 0.2, height / 3]
-                                    break
-                                    // small
-                                case 3:
-                                    fovBox = [width * 0.45, height * 0.4, width * 0.1, height * 0.2]
-                                    break
-                            }
-                            if (sp.x >= fovBox[0] && sp.x <= (fovBox[0] + fovBox[2]) && sp.y >= fovBox[1] && sp.y < (fovBox[1] + fovBox[3])) {
-                                target = targets[i]
-                                foundTarget = true
-                                break
-                            }
-                        }
-                        if (!foundTarget) {
-                            target = void "kpal"
-                        }
-                    }
-
-                    let isAiTarget = false
-                    if (this.game.AI.ais && this.settings.AImbot) {
-                        let aiTarget = this.game.AI.ais.filter(ent => ent.mesh && ent.mesh.visible && ent.health && ent.pos && ent.canBSeen).sort((p1, p2) => this.getDistance(this.me.x, this.me.z, p1.pos.x, p1.pos.z) - this.getDistance(this.me.x, this.me.z, p2.pos.x, p2.pos.z)).shift()
-                        if (!target || (aiTarget && this.getDistance(this.me.x, this.me.z, aiTarget.pos.x, aiTarget.pos.z) > this.getDistance(this.me.x, this.me.z, target.pos.x, target.pos.z))) {
-                            target = aiTarget
-                            isAiTarget = true
-                        }
-                    }
-
-                    const isShooting = input[key.shoot]
-                    if (target && this.settings.aimbot &&
-                        this.state.bindAimbotOn &&
-                        (!this.settings.aimbotRange || this.getDistance3D(this.me.x, this.me.y, this.me.z, target.x, target.y, target.z) < this.settings.aimbotRange) &&
-                        (!this.settings.rangeCheck || this.getDistance3D(this.me.x, this.me.y, this.me.z, target.x, target.y, target.z) <= this.me.weapon.range) &&
-                        !this.me[this.vars.reloadTimer]) {
-
-                        if (this.settings.awtv) {
-                            input[key.scope] = 1
-                        }
-                        target.isTarget = this.settings.markTarget
-
-                        const yDire = (this.getDir(this.me.z, this.me.x, target.npos.z, target.npos.x) || 0) * 1000
-                        const xDire = isAiTarget ?
-                              ((this.getXDir(this.me.x, this.me.y, this.me.z, target.npos.x, target.npos.y - target.dat.mSize / 2, target.npos.z) || 0) - (0.3 * this.me[this.vars.recoilAnimY])) * 1000 :
-                        ((this.getXDir(this.me.x, this.me.y, this.me.z, target.npos.x, target.npos.y - target[this.vars.crouchVal] * 3 + this.me[this.vars.crouchVal] * 3 + this.settings.aimOffset, target.npos.z) || 0) - (0.3 * this.me[this.vars.recoilAnimY])) * 1000
-
-                        // aimbot tweak
-                        if (this.settings.forceUnsilent) {
-                            this.controls.target = {
-                                xD: xDire / 1000,
-                                yD: yDire / 1000
-                            }
-                            this.controls.update(400)
-                        }
-
-                        // Different aimbot modes can share the same code
-                        switch (this.settings.aimbot) {
-                                // quickscope, silent, trigger aim, silent on aim, aim correction, unsilent
-                            case 1:
-                            case 2:
-                            case 5:
-                            case 6:
-                            case 9:
-                            case 10: {
-                                let onAim = [5, 6, 9].some(n => n == this.settings.aimbot)
-                                if ((this.settings.aimbot === 5 && input[key.scope]) || this.settings.aimbot === 10) {
-                                    this.controls.target = {
-                                        xD: xDire / 1000,
-                                        yD: yDire / 1000
-                                    }
-                                    this.controls.update(400)
-                                }
-                                if ([2, 10].some(n => n == this.settings.aimbot) || (this.settings.aimbot === 1 && this.me.weapon.id)) {
-                                    !this.me.weapon.melee && (input[key.scope] = 1)
-                                }
-                                if (this.me[this.vars.didShoot]) {
-                                    input[key.shoot] = 0
-                                    this.state.quickscopeCanShoot = false
-                                    setTimeout(() => {
-                                        this.state.quickscopeCanShoot = true
-                                    }, this.me.weapon.rate * .85)
-                                } else if (this.state.quickscopeCanShoot && (!onAim || input[key.scope])) {
-                                    if (!this.me.weapon.melee) {
-                                        input[key.scope] = 1
-                                    }
-                                    if (!this.settings.superSilent && this.settings.aimbot !== 9) {
-                                        input[key.ydir] = yDire
-                                        input[key.xdir] = xDire
-                                    }
-                                    if ((this.settings.aimbot !== 9 && (!this.me[this.vars.aimVal] || this.me.weapon.noAim || this.me.weapon.melee)) ||
-                                        (this.settings.aimbot === 9 && isShooting)) {
-                                        input[key.ydir] = yDire
-                                        input[key.xdir] = xDire
-                                        input[key.shoot] = 1
-                                    }
-                                }
-                            }
-                                break
-                                // spin aim useless rn
-                                // case 3: {
-                                //     if (me[dog.vars.didShoot]) {
-                                //         input[key.shoot] = 0
-                                //         dog.state.quickscopeCanShoot = false
-                                //         setTimeout(() => {
-                                //             dog.state.quickscopeCanShoot = true
-                                //         }, me.weapon.rate)
-                                //     } else if (dog.state.quickscopeCanShoot && !dog.state.spinFrame) {
-                                //         dog.state.spinFrame = input[key.frame]
-                                //     } else {
-                                //         const fullSpin = Math.PI * 2000
-                                //         const spinFrames = dog.settings.spinAimFrames
-                                //         const currentSpinFrame = input[key.frame]-dog.state.spinFrame
-                                //         if (currentSpinFrame < 0) {
-                                //             dog.state.spinFrame = 0
-                                //         }
-                                //         if (currentSpinFrame > spinFrames) {
-                                //             if (!dog.settings.superSilent) {
-                                //                 input[key.ydir] = yDire
-                                //                 input[key.xdir] = xDire
-                                //             }
-                                //             if (!me[dog.vars.aimVal] || me.weapon.noAim || me.weapon.melee) {
-                                //                 input[key.ydir] = yDire
-                                //                 input[key.xdir] = xDire
-                                //                 input[key.shoot] = 1
-                                //                 dog.state.spinFrame = 0
-                                //             }
-                                //         } else {
-                                //             input[key.ydir] = currentSpinFrame/spinFrames * fullSpin
-                                //             if (!me.weapon.melee)
-                                //                 input[key.scope] = 1
-                                //         }
-                                //     }
-                                // } break
-
-                                // aim assist, smooth on aim, smoother, easy aim assist
-                            case 4:
-                            case 7:
-                            case 8:
-                            case 11:
-                                if (input[key.scope] || this.settings.aimbot === 11) {
-                                    this.controls.target = {
-                                        xD: xDire / 1000,
-                                        yD: yDire / 1000
-                                    }
-                                    this.controls.update(({
-                                        4: 400,
-                                        7: 110,
-                                        8: 70,
-                                        11: 400
-                                    })[this.settings.aimbot])
-                                    if ([4, 11].some(n => n == this.settings.aimbot)) {
-                                        input[key.xdir] = xDire
-                                        input[key.ydir] = yDire
-                                    }
-                                    if (this.me[this.vars.didShoot]) {
-                                        input[key.shoot] = 0
-                                        this.state.quickscopeCanShoot = false
-                                        setTimeout(() => {
-                                            this.state.quickscopeCanShoot = true
-                                        }, this.me.weapon.rate * 0.85)
-                                    } else if (this.state.quickscopeCanShoot) {
-                                        input[this.me.weapon.melee ? key.shoot : key.scope] = 1
-                                    }
-                                } else {
-                                    this.controls.target = null
-                                }
-                                break
-                                // trigger bot
-                            case 12: {
-                                if (!this.three ||
-                                    !this.renderer ||
-                                    !this.renderer.camera ||
-                                    !this.game ||
-                                    !this.game.players ||
-                                    !this.game.players.list.length ||
-                                    !input[key.scope] ||
-                                    this.me[this.vars.aimVal]) {
-                                    break
-                                }
-                                // Only create these once for performance
-                                if (!this.state.raycaster) {
-                                    this.state.raycaster = new this.three.Raycaster()
-                                    this.state.mid = new this.three.Vector2(0, 0)
-                                }
-                                const playerMaps = []
-                                for (let i = 0; i < this.game.players.list.length; i++) {
-                                    let p = this.game.players.list[i]
-                                    if (!p || !p[this.vars.objInstances] || p.isYTMP || !(this.me.team === null || p.team !== this.me.team) || !p[this.vars.inView]) {
-                                        continue
-                                    }
-                                    playerMaps.push(p[this.vars.objInstances])
-                                }
-                                const raycaster = this.state.raycaster
-                                raycaster.setFromCamera(this.state.mid, this.renderer.camera)
-                                if (raycaster.intersectObjects(playerMaps, true).length) {
-                                    input[key.shoot] = this.me[this.vars.didShoot] ? 0 : 1
-                                }
-                            }
-                                break
-                        }
-                    } else {
-                        if (this.settings.uwtv) {
-                            input[key.scope] = 0
-                        }
-                        this.state.spinFrame = 0
-                    }
-                }
-
-                if (this.settings.alwaysAim) {
-                    input[key.scope] = 1
-                }
-                if (this.settings.preventMeleeThrowing && this.me.weapon.melee) {
-                    input[key.scope] = 0
-                }
-            }
-            return input;
-        }
-
-        render() {
-
-            var scale = this.scale || parseFloat(document.getElementById("uiBase").style.transform.match(/\((.+)\)/)[1]);
-            let width = innerWidth / scale,
-                height = innerHeight / scale
-
-            let world2Screen = (pos, yOffset = 0) => {
-                pos.y += yOffset
-                pos.project(this.renderer.camera)
-                pos.x = (pos.x + 1) / 2
-                pos.y = (-pos.y + 1) / 2
-                pos.x *= width
-                pos.y *= height
-                return pos
-            }
-            let line = (x1, y1, x2, y2, lW, sS) => {
-                this.ctx.save()
-                this.ctx.lineWidth = lW + 2
-                this.ctx.beginPath()
-                this.ctx.moveTo(x1, y1)
-                this.ctx.lineTo(x2, y2)
-                this.ctx.strokeStyle = "rgba(0, 0, 0, 0.25)"
-                this.ctx.stroke()
-                this.ctx.lineWidth = lW
-                this.ctx.strokeStyle = sS
-                this.ctx.stroke()
-                this.ctx.restore()
-            }
-            let rect = (x, y, ox, oy, w, h, color, fill) => {
-                this.ctx.save()
-                this.ctx.translate(~~x, ~~y)
-                this.ctx.beginPath()
-                fill ? this.ctx.fillStyle = color : this.ctx.strokeStyle = color
-                this.ctx.rect(ox, oy, w, h)
-                fill ? this.ctx.fill() : this.ctx.stroke()
-                this.ctx.closePath()
-                this.ctx.restore()
-            }
-            let getTextMeasurements = (arr) => {
-                for (let i = 0; i < arr.length; i++) {
-                    arr[i] = ~~this.ctx.measureText(arr[i]).width
-                }
-                return arr
-            }
-            let gradient = (x, y, w, h, colors) => {
-                const grad = this.ctx.createLinearGradient(x, y, w, h)
-                for (let i = 0; i < colors.length; i++) {
-                    grad.addColorStop(i, colors[i])
-                }
-                return grad
-            }
-            let text = (txt, font, color, x, y) => {
-                this.ctx.save()
-                this.ctx.translate(~~x, ~~y)
-                this.ctx.fillStyle = color
-                this.ctx.strokeStyle = "rgba(0, 0, 0, 0.5)"
-                this.ctx.font = font
-                this.ctx.lineWidth = 1
-                this.ctx.strokeText(txt, 0, 0)
-                this.ctx.fillText(txt, 0, 0)
-                this.ctx.restore()
-            }
-
-            const padding = 2
-
-            for (const player of this.game.players.list.filter(v => (!v.isYTMP && v.active && (v.pos = {
-                x: v.x,
-                y: v.y,
-                z: v.z
-            })))) {
-                const pos = new this.three.Vector3(player.pos.x, player.pos.y, player.pos.z)
-                const screenR = world2Screen(pos.clone())
-                const screenH = world2Screen(pos.clone(), player.height)
-                const hDiff = ~~(screenR.y - screenH.y)
-                const bWidth = ~~(hDiff * 0.6)
-                const font = this.settings.espFontSize + "px GameFont"
-                const enemy = this.me.team === null || player.team !== this.me.team;
-
-                if (!this.containsPoint(player.pos)) {
-                    continue
-                }
-
-                if (this.settings.tracers) {
-                    line(width / 2, (dog.settings.tracers === 2 ? height / 2 : height - 1), screenR.x, screenR.y, 2, player.team === null ? "#FF4444" : player.team === this.me.team ? "#44AAFF" : "#FF4444")
-                }
+                CRC2d.restore.apply(this.ctx, []);
+                this.ctx.strokeStyle = original_strokeStyle;
+                this.ctx.lineWidth = original_lineWidth;
+                this.ctx.font = original_font;
+                this.ctx.fillStyle = original_fillStyle;
 
                 // Chams
                 const obj = player[this.vars.objInstances];
@@ -1114,21 +1162,22 @@
                             writable: false
                         });
                     } else {
-                        let chamsEnabled = this.settings.chams;
-                        if (dog.gaybow >= 360) dog.gaybow = 0; else dog.gaybow++;
+                        let chamColor = this.settings.renderChams.val;
+                        let chamsEnabled = chamColor !== "off";
+                        //if (dog.gaybow >= 360) dog.gaybow = 0; else dog.gaybow++;
                         obj.traverse(child => {
                             if (child && child.type == "Mesh" && this.isDefined(child.material)) {
-                                if (!child.hasOwnProperty(dogStr)) {
-                                    child[dogStr] = child.material;
-                                } else if (child.hasOwnProperty(dogStr)) {
+                                if (!child.hasOwnProperty(skidStr)) {
+                                    child[skidStr] = child.material;
+                                } else if (child.hasOwnProperty(skidStr)) {
                                     Object.defineProperty(child, 'material', {
                                         get(){
-                                            return !chamsEnabled||(!enemy && !dog.settings.teamChams) ? this[dogStr] : new dog.three.MeshBasicMaterial({
-                                                color: new dog.three.Color(dog.settings.chamsCol == 12 ? `hsl(${dog.gaybow},100%, 50%)` : Object.values(dog.colors)[dog.settings.chamsCol]),
+                                            return !chamsEnabled ? this[skidStr] : new skid.three.MeshBasicMaterial({
+                                                color: new skid.three.Color(chamColor == "Rainbow" ? skid.overlay.rainbow.col : chamColor),
                                                 depthTest: false,
                                                 transparent: true,
                                                 fog: false,
-                                                wireframe: dog.settings.wireframe
+                                                wireframe: skid.settings.renderWireFrame.val
                                             })
                                         }
                                     });
@@ -1137,432 +1186,305 @@
                         })
                     }
                 }
+            }
+        }
 
-                if (this.settings.esp > 1) {
-                    if (player.isTarget) {
-                        this.ctx.save()
-                        const meas = getTextMeasurements(["TARGET"])
-                        text("TARGET", font, "#FFFFFF", screenH.x - meas[0] / 2, screenH.y - this.settings.espFontSize * 1.5)
+        spinTick(input) {
+            //this.game.players.getSpin(this.self);
+            //this.game.players.saveSpin(this.self, angle);
+            const angle = this.getAngleDst(input[2], this.me[this.vars.xDire]);
+            this.spins = this.getStatic(this.spins, new Array());
+            this.spinTimer = this.getStatic(this.spinTimer, this.config.spinTimer);
+            this.serverTickRate = this.getStatic(this.serverTickRate, this.config.serverTickRate);
+            (this.spins.unshift(angle), this.spins.length > this.spinTimer / this.serverTickRate && (this.spins.length = Math.round(this.spinTimer / this.serverTickRate)))
+            for (var e = 0, i = 0; i < this.spins.length; ++i) e += this.spins[i];
+            return Math.abs(e * (180 / Math.PI));
+        }
 
-                        this.ctx.beginPath()
-
-                        this.ctx.translate(screenH.x, screenH.y + Math.abs(hDiff / 2))
-                        this.ctx.arc(0, 0, Math.abs(hDiff / 2) + 10, 0, Math.PI * 2)
-
-                        this.ctx.strokeStyle = "#FFFFFF"
-                        this.ctx.stroke()
-                        this.ctx.closePath()
-                        this.ctx.restore()
+        raidBot(input) {
+            let target = this.game.AI.ais.filter(enemy => {
+                return undefined !== enemy.mesh && enemy.mesh && enemy.mesh.children[0] && enemy.canBSeen && enemy.health > 0
+            }).sort((p1, p2) => this.getD3D(this.me.x, this.me.z, p1.x, p1.z) - this.getD3D(this.me.x, this.me.z, p2.x, p2.z)).shift();
+            if (target) {
+                let canSee = this.containsPoint(target.mesh.position)
+                let yDire = (this.getDir(this.me.z, this.me.x, target.z, target.x) || 0)
+                let xDire = ((this.getXDire(this.me.x, this.me.y, this.me.z, target.x, target.y + target.mesh.children[0].scale.y * 0.85, target.z) || 0) - this.consts.recoilMlt * this.me[this.vars.recoilAnimY])
+                if (this.me.weapon[this.vars.nAuto] && this.me[this.vars.didShoot]) { input[this.key.shoot] = 0; input[this.key.scope] = 0; this.me.inspecting = false; this.me.inspectX = 0; }
+                else {
+                    if (!this.me.aimDir && canSee) {
+                        input[this.key.scope] = 1;
+                        if (!this.me[this.vars.aimVal]||this.me.weapon.noAim) {
+                            input[this.key.shoot] = 1;
+                            input[this.key.ydir] = yDire * 1e3
+                            input[this.key.xdir] = xDire * 1e3
+                            this.lookDir(xDire, yDire);
+                        }
                     }
+                }
+            } else {
+                this.resetLookAt();
+            }
+            return input;
+        }
 
-                    if (this.settings.esp === 2) {
-                        this.ctx.save()
-                        this.ctx.strokeStyle = (this.me.team === null || player.team !== this.me.team) ? "#FF4444" : "#44AAFF"
-                        this.ctx.strokeRect(screenH.x - bWidth / 2, screenH.y, bWidth, hDiff)
-                        this.ctx.restore()
-                        continue
+        onInput(input) {
+            if (this.isDefined(this.config) && this.config.aimAnimMlt) this.config.aimAnimMlt = 1;
+            if (this.isDefined(this.controls) && this.isDefined(this.config) && this.settings.inActivity.val) {
+                this.controls.idleTimer = 0;
+                this.config.kickTimer = Infinity
+            }
+            if (this.me) {
+                this.inputFrame ++;
+                if (this.inputFrame >= 100000) this.inputFrame = 0;
+                if (!this.game.playerSound[this.isProxy]) {
+                    this.game.playerSound = new Proxy(this.game.playerSound, {
+                        apply: function(target, that, args) {
+                            if (skid.settings.disableWpnSnd.val && args[0] && typeof args[0] == "string" && args[0].startsWith("weapon_")) return;
+                            return target.apply(that, args);
+                        },
+                        get: function(target, key) {
+                            return key === skid.isProxy ? true : Reflect.get(target, key);
+                        },
+                    })
+                }
+
+                let isMelee = this.isDefined(this.me.weapon.melee)&&this.me.weapon.melee||this.isDefined(this.me.weapon.canThrow)&&this.me.weapon.canThrow;
+                let ammoLeft = this.me[this.vars.ammos][this.me[this.vars.weaponIndex]];
+
+                // autoReload
+                if (this.settings.autoReload.val) {
+                    //let capacity = this.me.weapon.ammo;
+                    //if (ammoLeft < capacity)
+                    if (isMelee) {
+                        if (!this.me.canThrow) {
+                            //this.me.refillKnife();
+                        }
+                    } else if (!ammoLeft) {
+                        this.game.players.reload(this.me);
+                        input[this.key.reload] = 1;
+                        // this.me[this.vars.reloadTimer] = 1;
+                        //this.me.resetAmmo();
                     }
+                }
 
-                    rect((screenH.x - bWidth / 2) - 7, ~~screenH.y - 1, 0, 0, 4, hDiff + 2, "#000000", false)
-                    rect((screenH.x - bWidth / 2) - 7, ~~screenH.y - 1, 0, 0, 4, hDiff + 2, "#44FF44", true)
-                    rect((screenH.x - bWidth / 2) - 7, ~~screenH.y - 1, 0, 0, 4, ~~((player[this.vars.maxHealth] - player.health) / player[this.vars.maxHealth] * (hDiff + 2)), "#000000", true)
-                    this.ctx.save()
-                    this.ctx.lineWidth = 4
-                    this.ctx.translate(~~(screenH.x - bWidth / 2), ~~screenH.y)
-                    this.ctx.beginPath()
-                    this.ctx.rect(0, 0, bWidth, hDiff)
-                    this.ctx.strokeStyle = "rgba(0, 0, 0, 0.25)"
-                    this.ctx.stroke()
-                    this.ctx.lineWidth = 2
-                    this.ctx.strokeStyle = player.team === null ? '#FF4444' : this.me.team === player.team ? '#44AAFF' : '#FF4444'
-                    this.ctx.stroke()
-                    this.ctx.closePath()
-                    this.ctx.restore()
-
-                    const playerDist = ~~(this.getDistance3D(this.me.x, this.me.y, this.me.z, player.pos.x, player.pos.y, player.pos.z) / 10)
-                    this.ctx.save()
-                    this.ctx.font = font
-                    const meas = getTextMeasurements(["[", playerDist, "m]", player.level, "©", player.name])
-                    this.ctx.restore()
-                    const grad2 = gradient(0, 0, meas[4] * 5, 0, ["rgba(0, 0, 0, 0.25)", "rgba(0, 0, 0, 0)"])
-                    if (player.level) {
-                        const grad = gradient(0, 0, (meas[4] * 2) + meas[3] + (padding * 3), 0, ["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0.25)"])
-                        rect(~~(screenH.x - bWidth / 2) - 12 - (meas[4] * 2) - meas[3] - (padding * 3), ~~screenH.y - padding, 0, 0, (meas[4] * 2) + meas[3] + (padding * 3), meas[4] + (padding * 2), grad, true)
-                        text("" + player.level, font, '#FFFFFF', ~~(screenH.x - bWidth / 2) - 16 - meas[3], ~~screenH.y + meas[4] * 1)
+                //Auto Bhop
+                let autoBhop = this.settings.autoBhop.val;
+                if (autoBhop !== "off") {
+                    if (this.isKeyDown("Space") || autoBhop == "autoJump" || autoBhop == "autoSlide") {
+                        this.controls.keys[this.controls.binds.jumpKey.val] ^= 1;
+                        if (this.controls.keys[this.controls.binds.jumpKey.val]) {
+                            this.controls.didPressed[this.controls.binds.jumpKey.val] = 1;
+                        }
+                        if (this.isKeyDown("Space") || autoBhop == "autoSlide") {
+                            if (this.me[this.vars.yVel] < -0.03 && this.me.canSlide) {
+                                setTimeout(() => {
+                                    this.controls.keys[this.controls.binds.crouchKey.val] = 0;
+                                }, this.me.slideTimer||325);
+                                this.controls.keys[this.controls.binds.crouchKey.val] = 1;
+                                this.controls.didPressed[this.controls.binds.crouchKey.val] = 1;
+                            }
+                        }
                     }
-                    rect(~~(screenH.x + bWidth / 2) + padding, ~~screenH.y - padding, 0, 0, (meas[4] * 5), (meas[4] * 4) + (padding * 2), grad2, true)
-                    text(player.name, font, player.team === null ? '#FFCDB4' : this.me.team === player.team ? '#B4E6FF' : '#FFCDB4', (screenH.x + bWidth / 2) + 4, screenH.y + meas[4] * 1)
-                    if (player.clan) text("[" + player.clan + "]", font, "#AAAAAA", (screenH.x + bWidth / 2) + 8 + meas[5], screenH.y + meas[4] * 1)
-                    text(player.health + " HP", font, "#33FF33", (screenH.x + bWidth / 2) + 4, screenH.y + meas[4] * 2)
-                    text(player.weapon.name, font, "#DDDDDD", (screenH.x + bWidth / 2) + 4, screenH.y + meas[4] * 3)
-                    text("[", font, "#AAAAAA", (screenH.x + bWidth / 2) + 4, screenH.y + meas[4] * 4)
-                    text("" + playerDist, font, "#DDDDDD", (screenH.x + bWidth / 2) + 4 + meas[0], screenH.y + meas[4] * 4)
-                    text("m]", font, "#AAAAAA", (screenH.x + bWidth / 2) + 4 + meas[0] + meas[1], screenH.y + meas[4] * 4)
                 }
 
-            }
-
-            if (this.settings.fovbox && this.settings.drawFovbox) {
-                let fovBox = [width / 3, height / 4, width * (1 / 3), height / 2]
-                switch (this.settings.fovBoxSize) {
-                        // medium
-                    case 2:
-                        fovBox = [width * 0.4, height / 3, width * 0.2, height / 3]
-                        break
-                        // small
-                    case 3:
-                        fovBox = [width * 0.45, height * 0.4, width * 0.1, height * 0.2]
-                        break
-                }
-                this.ctx.save()
-                this.ctx.strokeStyle = "red"
-                this.ctx.strokeRect(...fovBox)
-                this.ctx.restore()
-            }
-        }
-
-        cleanGUI() {
-            let head = document.head || document.getElementsByTagName('head')[0] || 0,
-                css = this.createElement("style", "#aMerger, #endAMerger { display: none !important }");
-            head.appendChild(css);
-            window['onetrust-consent-sdk'].style.display = "none";
-            window.streamContainer.style.display = "none";
-            window.merchHolder.style.display = "none";
-            window.newsHolder.style.display = "none";
-        }
-
-        customCSS() {
-            if (!this.isDefined(this.CSSres) && this.settings.kpalCSS) {
-                let head = document.head || document.getElementsByTagName('head')[0] || 0
-                this.CSSres = document.createElement("link");
-                this.CSSres.rel = "stylesheet";
-                this.CSSres.href = "https://skidlamer.github.io/css/kpal.css"
-                this.CSSres.disabled = false;
-                head.appendChild(this.CSSres);
-            }
-            if (this.settings.customCSS.startsWith("http") && this.settings.customCSS.endsWith(".css")) {
-                //let head = document.head||document.getElementsByTagName('head')[0]||0
-                this.CSSres.href = this.settings.customCSS;
-                //head.appendChild(this.CSSres);
-            } else this.CSSres = undefined;
-        }
-
-        initGUI() {
-            function createButton(name, iconURL, fn) {
-                const menu = document.querySelector("#menuItemContainer"),
-                      menuItem = document.createElement("div"),
-                      menuItemIcon = document.createElement("div"),
-                      menuItemTitle = document.createElement("div")
-
-                menuItem.className = "menuItem"
-                menuItemIcon.className = "menuItemIcon"
-                menuItemTitle.className = "menuItemTitle"
-
-                menuItemTitle.innerHTML = name
-                menuItemIcon.style.backgroundImage = `url("https://cdn.discordapp.com/attachments/802562993703092265/810511829079031848/circle-cropped.png")`
-
-                menuItem.append(menuItemIcon, menuItemTitle)
-                menu.append(menuItem)
-
-                menuItem.addEventListener("click", fn)
-            }
-
-            dog.GUI.setSetting = function(setting, value) {
-                switch (setting) {
-                    case "customCSS":
-                        dog.settings.customCSS = value
-                        dog.customCSS();
-                        break
-
-                    default:
-                        console.log("SET ", setting, " ", value);
-                        dog.settings[setting] = value
-                }
-                localStorage.kro_setngss_json = JSON.stringify(dog.settings);
-            }
-            dog.GUI.windowIndex = windows.length + 1
-            dog.GUI.settings = {
-                aimbot: {
-                    val: this.settings.aimbot
+                //Autoaim
+                if (this.settings.autoAim.val !== "off") {
+                    this.playerMaps.length = 0;
+                    this.rayC.setFromCamera(this.vec2, this.renderer.fpsCamera);
+                    let target = this.game.players.list.filter(enemy => {
+                        let hostile = undefined !== enemy[this.vars.objInstances] && enemy[this.vars.objInstances] && !enemy[this.vars.isYou] && !this.getIsFriendly(enemy) && enemy.health > 0 && this.getInView(enemy);
+                        if (hostile) this.playerMaps.push( enemy[this.vars.objInstances] );
+                        return hostile
+                    }).sort((p1, p2) => this.getD3D(this.me.x, this.me.z, p1.x, p1.z) - this.getD3D(this.me.x, this.me.z, p2.x, p2.z)).shift();
+                    if (target) {
+                        //let count = this.spinTick(input);
+                        //if (count < 360) {
+                        //    input[2] = this.me[this.vars.xDire] + Math.PI;
+                        //} else console.log("spins ", count);
+                        //target.jumpBobY * this.config.jumpVel
+                        let canSee = this.containsPoint(target[this.vars.objInstances].position);
+                        let inCast = this.rayC.intersectObjects(this.playerMaps, true).length;
+                        let yDire = (this.getDir(this.me.z, this.me.x, target.z, target.x) || 0);
+                        let xDire = ((this.getXDire(this.me.x, this.me.y, this.me.z, target.x, target.y - target[this.vars.crouchVal] * this.consts.crouchDst + this.me[this.vars.crouchVal] * this.consts.crouchDst, target.z) || 0) - this.consts.recoilMlt * this.me[this.vars.recoilAnimY])
+                        if (this.me.weapon[this.vars.nAuto] && this.me[this.vars.didShoot]) {
+                            input[this.key.shoot] = 0;
+                            input[this.key.scope] = 0;
+                            this.me.inspecting = false;
+                            this.me.inspectX = 0;
+                        }
+                        else if (!canSee && this.settings.frustrumCheck.val) this.resetLookAt();
+                        else if (ammoLeft||isMelee) {
+                            input[this.key.scope] = this.settings.autoAim.val === "assist"||this.settings.autoAim.val === "correction"||this.settings.autoAim.val === "trigger" ? this.controls[this.vars.mouseDownR] : 0;
+                            switch (this.settings.autoAim.val) {
+                                case "quickScope":
+                                    input[this.key.scope] = 1;
+                                    if (!this.me[this.vars.aimVal]||this.me.weapon.noAim) {
+                                        if (!this.me.canThrow||!isMelee) input[this.key.shoot] = 1;
+                                        input[this.key.ydir] = yDire * 1e3
+                                        input[this.key.xdir] = xDire * 1e3
+                                        this.lookDir(xDire, yDire);
+                                    }
+                                    break;
+                                case "assist": case "easyassist":
+                                    if (input[this.key.scope] || this.settings.autoAim.val === "easyassist") {
+                                        if (!this.me.aimDir && canSee || this.settings.autoAim.val === "easyassist") {
+                                            input[this.key.ydir] = yDire * 1e3
+                                            input[this.key.xdir] = xDire * 1e3
+                                            this.lookDir(xDire, yDire);
+                                        }
+                                    }
+                                    break;
+                                case "silent":
+                                    if (!this.me[this.vars.aimVal]||this.me.weapon.noAim) {
+                                        if (!this.me.canThrow||!isMelee) input[this.key.shoot] = 1;
+                                    } else input[this.key.scope] = 1;
+                                    input[this.key.ydir] = yDire * 1e3
+                                    input[this.key.xdir] = xDire * 1e3
+                                    break;
+                                case "trigger":
+                                    if (input[this.key.scope] && canSee && inCast) {
+                                        input[this.key.shoot] = 1;
+                                        input[this.key.ydir] = yDire * 1e3
+                                        input[this.key.xdir] = xDire * 1e3
+                                    }
+                                    break;
+                                case "correction":
+                                    if (input[this.key.shoot] == 1) {
+                                        input[this.key.ydir] = yDire * 1e3
+                                        input[this.key.xdir] = xDire * 1e3
+                                    }
+                                    break;
+                                default:
+                                    this.resetLookAt();
+                                    break;
+                            }
+                        }
+                    } else {
+                        this.resetLookAt();
+                        //input = this.raidBot(input);
+                    }
                 }
             }
-            dog.GUI.windowObj = {
-                header: "CH33T",
-                html: "",
-                gen() {
-                    return dog.getGuiHtml()
+
+            //else if (this.settings.autoClick.val && !this.ui.hasEndScreen) {
+            //this.config.deathDelay = 0;
+            //this.controls.toggle(true);
+            //}
+
+            //this.game.config.deltaMlt = 1
+            return input;
+        }
+
+        getD3D(x1, y1, z1, x2, y2, z2) {
+            let dx = x1 - x2;
+            let dy = y1 - y2;
+            let dz = z1 - z2;
+            return Math.sqrt(dx * dx + dy * dy + dz * dz);
+        }
+
+        getAngleDst(a, b) {
+            return Math.atan2(Math.sin(b - a), Math.cos(a - b));
+        }
+
+        getXDire(x1, y1, z1, x2, y2, z2) {
+            let h = Math.abs(y1 - y2);
+            let dst = this.getD3D(x1, y1, z1, x2, y2, z2);
+            return (Math.asin(h / dst) * ((y1 > y2)?-1:1));
+        }
+
+        getDir(x1, y1, x2, y2) {
+            return Math.atan2(y1 - y2, x1 - x2);
+        }
+
+        getDistance(x1, y1, x2, y2) {
+            return Math.sqrt((x2 -= x1) * x2 + (y2 -= y1) * y2);
+        }
+
+        containsPoint(point) {
+            let planes = this.renderer.frustum.planes;
+            for (let i = 0; i < 6; i ++) {
+                if (planes[i].distanceToPoint(point) < 0) {
+                    return false;
                 }
             }
-            Object.defineProperty(window.windows, windows.length, {
-                value: dog.GUI.windowObj
-            })
+            return true;
+        }
 
-            if (this.settings.showGuiButton) {
-                createButton("HomeWare-69", null, () => {
-                    window.showWindow(dog.GUI.windowIndex)
-                })
+        getCanSee(from, toX, toY, toZ, boxSize) {
+            if (!from) return 0;
+            boxSize = boxSize||0;
+            for (let obj, dist = this.getD3D(from.x, from.y, from.z, toX, toY, toZ), xDr = this.getDir(from.z, from.x, toZ, toX), yDr = this.getDir(this.getDistance(from.x, from.z, toX, toZ), toY, 0, from.y), dx = 1 / (dist * Math.sin(xDr - Math.PI) * Math.cos(yDr)), dz = 1 / (dist * Math.cos(xDr - Math.PI) * Math.cos(yDr)), dy = 1 / (dist * Math.sin(yDr)), yOffset = from.y + (from.height || 0) - this.consts.cameraHeight, aa = 0; aa < this.game.map.manager.objects.length; ++aa) {
+                if (!(obj = this.game.map.manager.objects[aa]).noShoot && obj.active && !obj.transparent && (!this.settings.wallPenetrate.val || (!obj.penetrable || !this.me.weapon.pierce))) {
+                    let tmpDst = this.lineInRect(from.x, from.z, yOffset, dx, dz, dy, obj.x - Math.max(0, obj.width - boxSize), obj.z - Math.max(0, obj.length - boxSize), obj.y - Math.max(0, obj.height - boxSize), obj.x + Math.max(0, obj.width - boxSize), obj.z + Math.max(0, obj.length - boxSize), obj.y + Math.max(0, obj.height - boxSize));
+                    if (tmpDst && 1 > tmpDst) return tmpDst;
+                }
             }
+            /*
+        let terrain = this.game.map.terrain;
+        if (terrain) {
+            let terrainRaycast = terrain.raycast(from.x, -from.z, yOffset, 1 / dx, -1 / dz, 1 / dy);
+            if (terrainRaycast) return utl.getD3D(from.x, from.y, from.z, terrainRaycast.x, terrainRaycast.z, -terrainRaycast.y);
+        }
+        */
+            return null;
         }
 
-        showGUI() {
-            if (document.pointerLockElement || document.mozPointerLockElement) {
-                document.exitPointerLock()
-            }
-            window.showWindow(this.GUI.windowIndex)
+        lineInRect(lx1, lz1, ly1, dx, dz, dy, x1, z1, y1, x2, z2, y2) {
+            let t1 = (x1 - lx1) * dx;
+            let t2 = (x2 - lx1) * dx;
+            let t3 = (y1 - ly1) * dy;
+            let t4 = (y2 - ly1) * dy;
+            let t5 = (z1 - lz1) * dz;
+            let t6 = (z2 - lz1) * dz;
+            let tmin = Math.max(Math.max(Math.min(t1, t2), Math.min(t3, t4)), Math.min(t5, t6));
+            let tmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)), Math.max(t5, t6));
+            if (tmax < 0) return false;
+            if (tmin > tmax) return false;
+            return tmin;
         }
 
-        getGuiHtml() {
-            const builder = {
-                checkbox: (name, settingName, description = "", needsRestart = false) => `<div class="settName" title="${description}">${name} ${needsRestart ? "<span style=\"color: #eb5656\">*</span>" : ""}<label class="switch" style="margin-left:10px"><input type="checkbox" onclick='${dogStr}.GUI.setSetting("${settingName}", this.checked)' ${dog.settings[settingName]?"checked":""}><span class="slider"></span></label></div>`,
-                client_setting: (name, settingName, description = "", needsRestart = true) => `<div class="settName" title="${description}">${name} ${needsRestart ? "<span style=\"color: #eb5656\">*</span>" : ""}<label class="switch" style="margin-left:10px"><input type="checkbox" onclick='doge_setsetting("${settingName}", this.checked?"1":"0")' ${dog.settings[settingName]?"checked":""}><span class="slider"></span></label></div>`,
-    select: (name, settingName, options, description = "", needsRestart = false) => {
-        let built = `<div class="settName" title="${description}">${name} ${needsRestart ? "<span style=\"color: #eb5656\">*</span>" : ""}<select onchange='${dogStr}.GUI.setSetting("${settingName}", parseInt(this.value))' class="inputGrey2">`
-        for (const option in options) {
-            if (options.hasOwnProperty(option))
-                built += `<option value="${options[option]}" ${dog.settings[settingName] == options[option]?"selected":""}>${option}</option>,`
+        lookDir(xDire, yDire) {
+            this.controls.object.rotation.y = yDire
+            this.controls[this.vars.pchObjc].rotation.x = xDire;
+            this.controls[this.vars.pchObjc].rotation.x = Math.max(-this.consts.halfPI, Math.min(this.consts.halfPI, this.controls[this.vars.pchObjc].rotation.x));
+            this.controls.yDr = (this.controls[this.vars.pchObjc].rotation.x % Math.PI).round(3);
+            this.controls.xDr = (this.controls.object.rotation.y % Math.PI).round(3);
+            this.renderer.camera.updateProjectionMatrix();
+            this.renderer.updateFrustum();
         }
-        return built + "</select></div>"
-    },
-        slider: (name, settingName, min, max, step, description = "") => `<div class="settName" title="${description}">${name} <input type="number" class="sliderVal" id="slid_input_${settingName}" min="${min}" max="${max}" value="${dog.settings[settingName]}" onkeypress="${dogStr}.GUI.setSetting('${settingName}', parseFloat(this.value.replace(',', '.')));document.querySelector('#slid_input_${settingName}').value=this.value" style="margin-right:0;border-width:0"><div class="slidecontainer" style=""><input type="range" id="slid_${settingName}" min="${min}" max="${max}" step="${step}" value="${dog.settings[settingName]}" class="sliderM" oninput="${dogStr}.GUI.setSetting('${settingName}', parseFloat(this.value));document.querySelector('#slid_input_${settingName}').value=this.value"></div></div>`,
-            input: (name, settingName, type, description, extra) => `<div class="settName" title="${description}">${name} <input type="${type}" name="${type}" id="slid_utilities_${settingName}"\n${'color' == type ? 'style="float:right;margin-top:5px"' : `class="inputGrey2" placeholder="${extra}"`}\nvalue="${dog.settings[settingName]}" oninput="${dogStr}.GUI.setSetting(\x27${settingName}\x27, this.value)"/></div>`,
-                label: (name, description) => "<br><span style='color: black; font-size: 20px; margin: 20px 0'>" + name + "</span> <span style='color: dimgrey; font-size: 15px'>" + (description || "") + "</span><br>",
-                    nobrlabel: (name, description) => "<span style='color: black; font-size: 20px; margin: 20px 0'>" + name + "</span> <span style='color: dimgrey; font-size: 15px'>" + (description || "") + "</span><br>",
-                        br: () => "<br>",
-                            style: content => `<style>${content}</style>`,
-};
-    let built = `<div id="settHolder">
-<img src="https://cdn.discordapp.com/attachments/802562993703092265/810578572350980146/HomewareBanner.jpg" width="90%">
-<div class="imageButton discordSocial" onmouseenter="playTick()" onclick="openURL('https://discord.gg/bngY3TryZX')"><span style='display:inline'></span></div>`
 
-    // fix fugly looking 'built +=' before every builder call
-    Object.keys(builder).forEach(name => {
-        const o = builder[name]
-        builder[name] = function() {
-            return built += o.apply(this, arguments), ""
+        resetLookAt() {
+            this.controls.yDr = this.controls[this.vars.pchObjc].rotation.x;
+            this.controls.xDr = this.controls.object.rotation.y;
+            this.renderer.camera.updateProjectionMatrix();
+            this.renderer.updateFrustum();
         }
-    })
 
-    // Tabs stuff
-    const tabNames = ["Weapon", "Wallhack", "Visual", "Tweaks", "Movement", "Other"]
-    if (dog.isClient) {
-        tabNames.push("Client")
-    }
-    builder.style(`.cheatTabButton { color: black; background: #ddd; padding: 2px 7px; font-size: 15px; cursor: pointer; text-align: center; } .cheatTabActive { background: #bbb;}`)
-    this.GUI.changeTab = function(tabbtn) {
-        const tn = tabbtn.innerText
-        document.getElementById("cheat-tabbtn-" + tabNames[dog.state.activeTab]).classList.remove("cheatTabActive")
-        document.getElementById("cheat-tab-" + tabNames[dog.state.activeTab]).style.display = "none"
-        tabbtn.classList.add("cheatTabActive")
-        document.getElementById("cheat-tab-" + tn).style.display = "block"
-        dog.state.activeTab = tabNames.indexOf(tn)
-    }
-    built += `<table style="width: 100%; margin-bottom: 30px"><tr>`
-    for (let i = 0; i < tabNames.length; i++) {
-        const tab = tabNames[i]
-        built += `<td id="cheat-tabbtn-${tab}" onclick="${dogStr}.GUI.changeTab(this)" class="cheatTabButton ${tabNames[dog.state.activeTab] === tab ? 'cheatTabActive' : ''}">`
-        built += tab
-        built += `</td>`
-    }
-    built += `</table></tr>`
+        world2Screen (position) {
+            let pos = position.clone();
+            let scaledWidth = this.ctx.canvas.width / this.scale;
+            let scaledHeight = this.ctx.canvas.height / this.scale;
+            pos.project(this.renderer.camera);
+            pos.x = (pos.x + 1) / 2;
+            pos.y = (-pos.y + 1) / 2;
+            pos.x *= scaledWidth;
+            pos.y *= scaledHeight;
+            return pos;
+        }
 
-    function tab(i, cb) {
-        built += `<div style="display: ${dog.state.activeTab === i ? 'block' : 'none'}" class="cheat-tab" id="cheat-tab-${tabNames[i]}">`
-        cb()
-        built += `</div>`
-    }
+        getInView(entity) {
+            return null == this.getCanSee(this.me, entity.x, entity.y, entity.z);
+        }
 
-    // build gui
-    tab(0, () => {
-        builder.select("Aimbot [Y]", "aimbot", {
-            "None": 0,
-            "Quickscope / Auto pick": 1,
-            "Silent aimbot": 2,
-            //"Spin aimbot": 3,
-            "Aim assist": 4,
-            "Easy aim assist": 11,
-            "SP Trigger bot": 12,
-            "Silent on aim": 6,
-            "Smooth": 7,
-            "Unsilent": 10,
-            "Unsilent on aim": 5,
-            "Aim correction": 9,
-        })
-        builder.select("Spin aimbot speed", "spinAimFrames", {
-            "1": 30,
-            "2": 20,
-            "3": 15,
-            "4": 10,
-            "5": 5,
-        })
-        builder.slider("Aim range", "aimbotRange", 0, 1000, 10, "Set above 0 to make the aimbot pick enemies only at the selected range")
-        builder.slider("Aim offset", "aimOffset", -4, 1, 0.1, "The lower it is, the lower the aimbot will shoot (0 - head, -4 - body)")
-        builder.slider("Aim noise", "aimNoise", 0, 2, 0.005, "The higher it is, the lower is the aimbot accuracy")
-        builder.checkbox("Supersilent aim", "superSilent", "Only works with quickscope and silent aim, makes it almost invisible that you're looking at somebody when you're shooting at him")
-        builder.checkbox("Aim at AIs", "AImbot", "Makes the aimbot shoot at NPCs")
-        builder.checkbox("FOV check", "frustumCheck", "Makes you only shoot at enemies that are in your field of view. Prevents 180 flicks")
-        builder.checkbox("FOV box", "fovbox", "Creates a box in which enemies can be targetted, enable with FOV check")
-        builder.select("FOV box size", "fovBoxSize", {
-            "Big": 1,
-            "Medium": 2,
-            "Small": 3,
-        })
-        builder.checkbox("Wallbangs", "wallbangs", "Makes the aimbot shoot enemies behind walls")
-        builder.checkbox("Aimbot range check", "rangeCheck", "Checks if the enemy is in range of your weapon before shooting it, disable for rocket launcher")
-        builder.checkbox("Auto reload", "autoReload", "Automatically reloads your weapon when it's out of ammo")
-        builder.checkbox("Prevent melee throwing", "preventMeleeThrowing", "Prevents you from throwing your knife")
-        //builder.checkbox("Auto swap", "autoSwap", "Automatically swaps the weapon when you're out of ammo")
-    })
-
-    tab(1, () => {
-        builder.select("ESP [H]", "esp", {
-            "None": 0,
-            "Nametags": 1,
-            "Box ESP": 2,
-            "Full ESP": 3,
-        })
-        builder.select("ESP Font Size", "espFontSize", {
-            "30px": 30,
-            "25px": 25,
-            "20px": 20,
-            "15px": 15,
-            "10px": 10,
-            "5px": 5,
-        })
-        builder.select("Tracers", "tracers", {
-            "None": 0,
-            "Bottom": 1,
-            "Middle": 2,
-        }, "Draws lines to players")
-        builder.checkbox("Mark aimbot target", "markTarget", "Shows who is the aimbot targetting at the time, useful for aim assist/aim correction")
-        builder.checkbox("Draw FOV box", "drawFovbox", "Draws the FOV box from aimbot settings")
-        builder.checkbox("Chams", "chams")
-        builder.select("Chams colour", "chamsCol", {
-            White: 0,
-            Black: 1,
-            Purple: 2,
-            Pink: 3,
-            Blue: 4,
-            DarkBlue: 5,
-            Aqua: 6,
-            Green: 7,
-            Lime: 8,
-            Orange: 9,
-            Yellow: 10,
-            Red: 11,
-            Gaybow: 12,
-        })
-        builder.checkbox("Friendly chams", "teamChams", "Show Chams for friendly players")
-        builder.checkbox("Wireframe", "wireframe")
-        builder.slider("RGB interval", "chamsInterval", 50, 1000, 50, "How fast will the RGB chams change colour")
-    })
-
-    tab(2, () => {
-        builder.checkbox("Third person mode", "thirdPerson")
-        builder.checkbox("Skin hack", "skinHack", "Makes you able to use any skin in game, only shows on your side")
-        builder.checkbox("Billboard shaders", "animatedBillboards", "Disable if you get fps drops")
-        builder.checkbox("Any weapon trail", "alwaysTrail")
-        builder.slider("Weapon Zoom", "weaponZoom", 0, 20, 1, "Weapon Zoom Multiplier Adjust")
-    })
-
-    tab(3, () => {
-        builder.checkbox("Always aim", "alwaysAim", "Makes you slower and jump lower, but the aimbot can start shooting at enemies  faster. Only use if ur good at bhopping")
-        builder.checkbox("Aim when target visible", "awtv")
-        builder.checkbox("Unaim when no target visible", "uwtv")
-        builder.checkbox("Force unsilent", "forceUnsilent")
-    })
-
-    tab(4, () => {
-        builder.select("Auto bhop", "bhop", {
-            "None": 0,
-            "Auto Jump": 1,
-            "Key Jump": 2,
-            "Auto Slide": 3,
-            "Key Slide": 4,
-        })
-        builder.label("Only use with silent aim")
-        builder.select("Pitch hax", "pitchHack", {
-            "Disabled": 0,
-            "Downward": 1,
-            "Upward": 2,
-            "sin(time)": 3,
-            "sin(time/5)": 4,
-            "double": 5,
-            "random": 6,
-        }, "Only use with aimbot on")
-        builder.checkbox("Spin bot", "spinBot")
-    })
-
-    tab(5, () => {
-        builder.checkbox("Show GUI button", "showGuiButton", "Disable if you don't want the dog under settings to be visible")
-        builder.checkbox("GUI on middle mouse button", "guiOnMMB", "Makes it possible to open this menu by clicking the mouse wheel")
-        builder.checkbox("Keybinds", "keybinds", "Turn keybinds on/off, Aimbot - Y, ESP - H")
-        builder.checkbox("No inactivity kick", "antikick", "Disables the 'Kicked for inactivity' message (client side, but works)")
-        builder.checkbox("Auto nuke", "autoNuke", "Automatically nukes when you are able to")
-        builder.checkbox("Force nametags on", "fgno", "Use in custom games with disabled nametags")
-        builder.checkbox("Use Kpal CSS", "kpalCSS", "Use the kpal CSS when no custom CSS is Applied")
-        builder.input("Custom CSS", "customCSS", "url", "", "URL to CSS file")
-    })
-
-    if (dog.isClient) {
-        tab(6, () => {
-            builder.nobrlabel("Restart is required after changing any of these settings")
-            builder.br()
-            builder.client_setting("Uncap FPS", "uncap_fps", "Disables V-Sync")
-            builder.client_setting("Adblock", "adblock", "Disables ads")
-        })
-    }
-
-    built += "</div>"
-
-    return built;
-}
-
- getDistance(x1, y1, x2, y2) {
-    return Math.sqrt((x2 -= x1) * x2 + (y2 -= y1) * y2);
-}
-
-getDistance3D(x1, y1, z1, x2, y2, z2) {
-    let dx = x1 - x2;
-    let dy = y1 - y2;
-    let dz = z1 - z2;
-    return Math.sqrt(dx * dx + dy * dy + dz * dz);
-}
-
-getXDir(x1, y1, z1, x2, y2, z2) {
-    let h = Math.abs(y1 - y2);
-    let dst = this.getDistance3D(x1, y1, z1, x2, y2, z2);
-    return (Math.asin(h / dst) * ((y1 > y2) ? -1 : 1));
-}
-
-getDir(x1, y1, x2, y2) {
-    return Math.atan2(y1 - y2, x1 - x2);
-}
-
-getAngleDist(a, b) {
-    return Math.atan2(Math.sin(b - a), Math.cos(a - b));
-}
-
-containsPoint(point) {
-    let planes = this.renderer.frustum.planes;
-    for (let i = 0; i < 6; i++) {
-        if (planes[i].distanceToPoint(point) < 0) {
-            return false;
+        getIsFriendly(entity) {
+            return (this.me && this.me.team ? this.me.team : this.me.spectating ? 0x1 : 0x0) == entity.team
         }
     }
-    return true;
-}
 
-world2Screen(pos, width, height, yOffset = 0) {
-    pos.y += yOffset
-    pos.project(this.renderer.camera)
-    pos.x = (pos.x + 1) / 2
-    pos.y = (-pos.y + 1) / 2
-    pos.x *= width
-    pos.y *= height
-    return pos
-}
-};
+    window[skidStr] = new Skid();
 
-window[dogStr] = new Dogeware();
+})([...Array(8)].map(_ => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'[~~(Math.random()*52)]).join(''), CanvasRenderingContext2D.prototype);
 
-})([...Array(8)].map(_ => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' [~~(Math.random() * 52)]).join(''));
+
+//window.instructionHolder.style.display = "block";
+      //  window.instructions.innerHTML = `<div id="settHolder"><img src="https://cdn.discordapp.com/attachments/802562993703092265/810510431634456587/Profile_Picture.gif" width="25%"></div><a href='https://discord.gg/bngY3TryZX' target='_blank.'><div class="imageButton discordSocial"></div></a>`
