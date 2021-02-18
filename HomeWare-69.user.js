@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name          Krunker Homeware-69 obv not pasted
-// @description   A full featured Mod menu for game Krunker.io!
+// @description   Hack by CaptnDNA and Minecodes (Why class Dogeware? cuz its a little pasted from Dogeware)
 // @version       2
 // @updateURL     https://github.com/HaxerDNA/HomeWare/raw/main/HomeWare-69.user.js
 // @author        CaptnDNA - From Homeware-69
