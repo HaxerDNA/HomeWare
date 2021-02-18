@@ -1169,12 +1169,11 @@ cheat.ui = new (require('./ui.js').init)({
 			unit: 1,
 		}]
 	},{
-		name: 'Settings',
+		name: 'Exploits',
 		contents: [{
-			name: 'Join the Discord',
-			type: 'function_inline',
+			name: 'Sniper Bullet TP (Not Working!)',
+			type: 'bool',
 			key: 'unset',
-			val: () => window.open('https://e9x.github.io/kru/inv/'),
 		}],
 	}],
 });
