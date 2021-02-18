@@ -2,7 +2,7 @@
 // @name          Krunker Homeware-69 obv not pasted
 // @description   Mod Menu for Krunker (It says Sploit at some points bc other name for it)
 // @version       3
-// @author        CaptnDNA and Minecodes
+// @author        CaptnDNA and B374
 // @supportURL    https://discord.gg/bngY3TryZX
 // @homepage      Comming Soon...
 // @iconURL       https://cdn.discordapp.com/attachments/802562993703092265/810509012399030312/HomewarePFP.jpg
