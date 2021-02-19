@@ -1286,7 +1286,7 @@ by
                 menuItemTitle.className = "menuItemTitle"
 
                 menuItemTitle.innerHTML = name
-                menuItemIcon.style.backgroundImage = `url("https://cdn.discordapp.com/attachments/802562993703092265/812331687194525726/HomeWare-69.gif")`
+                menuItemIcon.style.backgroundImage = `url("https://cdn.discordapp.com/attachments/802562993703092265/810511829079031848/circle-cropped.png")`
 
                 menuItem.append(menuItemIcon, menuItemTitle)
                 menu.append(menuItem)
