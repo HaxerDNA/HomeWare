@@ -1286,7 +1286,7 @@ by
                 menuItemTitle.className = "menuItemTitle"
 
                 menuItemTitle.innerHTML = name
-                menuItemIcon.style.backgroundImage = `url("https://i.imgur.com/jjkFpnV.gif")`
+                menuItemIcon.style.backgroundImage = `url("https://cdn.discordapp.com/attachments/802562993703092265/812331687194525726/HomeWare-69.gif")`
 
                 menuItem.append(menuItemIcon, menuItemTitle)
                 menu.append(menuItem)
@@ -1314,7 +1314,7 @@ by
                 }
             }
             dog.GUI.windowObj = {
-                header: "CH33T",
+                header: "HomeWare-69",
                 html: "",
                 gen() {
                     return dog.getGuiHtml()
@@ -1325,7 +1325,7 @@ by
             })
 
             if (this.settings.showGuiButton) {
-                createButton("CH33TS", null, () => {
+                createButton("HomeWare", null, () => {
                     window.showWindow(dog.GUI.windowIndex)
                 })
             }
@@ -1358,8 +1358,8 @@ by
                             style: content => `<style>${content}</style>`,
 };
     let built = `<div id="settHolder">
-<img src="https://i.imgur.com/tE0QUPv.png" width="90%">
-<div class="imageButton discordSocial" onmouseenter="playTick()" onclick="openURL('https://skidlamer.github.io/wp/index.html')"><span style='display:inline'></span></div>`
+<img src="https://cdn.discordapp.com/attachments/810837546610196510/812330957536624640/Homeware-69.jpg" width="90%">
+<div class="imageButton discordSocial" onmouseenter="playTick()" onclick="openURL('https://discord.gg/bngY3TryZX')"><span style='display:inline'></span></div>`
 
     // fix fugly looking 'built +=' before every builder call
     Object.keys(builder).forEach(name => {
