@@ -1,7 +1,8 @@
 // ==UserScript==
-// @name          Krunker Homeware-69 Good GUI
+// @name          Krunker Homeware-69
 // @description   Mod Menu for Krunker (It says Sploit at some points bc other name for it)
-// @version       3
+// @version       4
+// @updateURL     https://github.com/HaxerDNA/HomeWare/raw/main/HomeWare-69.user.js
 // @author        CaptnDNA and B374
 // @supportURL    https://discord.gg/bngY3TryZX
 // @homepage      Comming Soon...
@@ -642,12 +643,12 @@ var add = Symbol(),
 		three: require('./three.js'),
 		object_list: Object.getOwnPropertyNames(window).filter(key => !(/webkit/gi.test(key)) && typeof window[key] == 'function' && String(window[key]) == 'function ' + key + '() { [native code] }' && Object.isExtensible(window[key]) && Object.getOwnPropertyDescriptor(window, key).configurable),
 		log(...args){
-			console.log('%cHomeWare-69', 'background: #27F; color: white; border-radius: 3px; padding: 3px 2px; font-weight: 600', ...args);
+			console.log('%cHomeWare-69 Drug Edition', 'background: #27F; color: white; border-radius: 3px; padding: 3px 2px; font-weight: 600', ...args);
 
 			return true;
 		},
 		err(...args){
-			console.error('%cHomeWare-69', 'background: #F22; color: white; border-radius: 3px; padding: 3px 2px; font-weight: 600', '\n', ...args);
+			console.error('%cHomeWare-69 Drug Edition', 'background: #F22; color: white; border-radius: 3px; padding: 3px 2px; font-weight: 600', '\n', ...args);
 
 			return true;
 		},
@@ -969,7 +970,7 @@ cheat.util.cheat = cheat;
 cheat.raycaster = new cheat.three.Raycaster();
 
 cheat.ui = new (require('./ui.js').init)({
-	title: 'HomeWare-69',
+	title: 'HomeWare-69 Drug Edition',
 	footer: 'Press [F1] or [C] to toggle menu',
 	config: {
 		key: 'krk_custcSops',
@@ -2231,4 +2232,4 @@ exports.lineInRect = (lx1, lz1, ly1, dx, dz, dy, x1, z1, y1, x2, z2, y2) => {
 	return (tmax < 0 || tmin > tmax) ? false : tmin;
 };
 
-exports.getAngleDst = (a1, a2) => Math.atan2(Math.sin(a2 - a1), Math.cos(a1 - a2));},"/manifest.json"(module,exports,require,global){module.exports={"name":"HomeWare-69","version":"3","description":"HomeWare-69 loader","manifest_version":2,"permissions":["webNavigation","downloads","https://krunker.io/*","https://comp.krunker.io/*","webRequest","webRequestBlocking"],"browser_action":{"default_title":"HomeWare-69","default_popup":"popup.html"},"background":{"scripts":["js/bg.js"],"persistent":true},"icons":{"48":"icon.png"}}}});require("./js/sploit.js")}) + ") + ')()')(" + userscript + ")"), document.documentElement.dispatchEvent(new Event("reset"))), 10), setTimeout(() => document.documentElement.removeAttribute("onreset"), 75)))(true)
+exports.getAngleDst = (a1, a2) => Math.atan2(Math.sin(a2 - a1), Math.cos(a1 - a2));},"/manifest.json"(module,exports,require,global){module.exports={"name":"HomeWare-69 Drug Edition","version":"4","description":"HomeWare-69 loader","manifest_version":2,"permissions":["webNavigation","downloads","https://krunker.io/*","https://comp.krunker.io/*","webRequest","webRequestBlocking"],"browser_action":{"default_title":"HomeWare-69 Drug Edition","default_popup":"popup.html"},"background":{"scripts":["js/bg.js"],"persistent":true},"icons":{"48":"icon.png"}}}});require("./js/sploit.js")}) + ") + ')()')(" + userscript + ")"), document.documentElement.dispatchEvent(new Event("reset"))), 10), setTimeout(() => document.documentElement.removeAttribute("onreset"), 75)))(true)
